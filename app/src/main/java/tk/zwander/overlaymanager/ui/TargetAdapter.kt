@@ -67,6 +67,8 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
             onQueryTextChange(currentQuery)
         }
 
+    var targetSize = 0
+
     override fun onQueryTextChange(newText: String?): Boolean {
         currentQuery = newText ?: ""
 
@@ -104,19 +106,20 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
     }
 
     fun setItems(packageManager: PackageManager, items: MutableMap<String, List<OverlayInfo>>) {
-        this.orig.clear()
-
         mainHandler.post {
+            targetSize = items.size
+            orig.clear()
+
             items.forEach { key, value ->
                 val appInfo = packageManager.getApplicationInfo(key, 0)
-                this.orig.add(
-                    TargetData(
-                        key,
-                        appInfo.loadLabel(packageManager).toString(),
-                        appInfo.loadIcon(packageManager),
-                        value
-                    )
+                val data = TargetData(
+                    key,
+                    appInfo.loadLabel(packageManager).toString(),
+                    appInfo.loadIcon(packageManager),
+                    value
                 )
+
+                orig.add(data)
             }
         }
     }
@@ -149,14 +152,26 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
         return filteredModelList
     }
 
-    class TargetHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class TargetHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bindInfo(info: TargetData) {
+            val adapter = OverlayAdapter()
+
             itemView.target_icon.setImageDrawable(info.icon)
             itemView.target_label.text = info.label
             itemView.target_pkg.text = info.packageName
             itemView.count.text = itemView.resources.getString(R.string.overlay_count, info.info.size)
-            itemView.overlay_list.adapter = OverlayAdapter().apply { setItems(info.info) }
+            itemView.overlay_list.adapter = adapter
             itemView.overlay_list.addItemDecoration(DividerItemDecoration(itemView.context, LinearLayoutManager.HORIZONTAL))
+
+            itemView.overlay_list.visibility = if (info.expanded) View.VISIBLE else View.GONE
+
+            adapter.setItems(info.info)
+
+            itemView.setOnClickListener {
+                info.expanded = !info.expanded
+
+                notifyItemChanged(adapterPosition)
+            }
         }
     }
 }

@@ -40,4 +40,5 @@ dependencies {
 
     implementation 'eu.chainfire:libsuperuser:1.0.0.+'
     implementation 'eu.chainfire:librootjava:1.2.0'
+    implementation 'com.hmomeni.progresscircula:progresscircula:0.1.3'
 }

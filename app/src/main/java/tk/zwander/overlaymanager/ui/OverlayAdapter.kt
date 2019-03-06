@@ -54,7 +54,6 @@ class OverlayAdapter : RecyclerView.Adapter<OverlayAdapter.OverlayHolder>() {
 
     fun setItems(list: List<OverlayInfo>) {
         items.clear()
-
         items.addAll(list)
     }
 

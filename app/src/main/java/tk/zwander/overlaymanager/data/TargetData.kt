@@ -7,5 +7,6 @@ data class TargetData(
     val packageName: String,
     val label: String,
     val icon: Drawable,
-    val info: List<OverlayInfo>
+    val info: List<OverlayInfo>,
+    var expanded: Boolean = false
 )
