@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="8dp"
+    app:cardBackgroundColor="@color/cardBackground"
+    app:cardCornerRadius="8dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?android:selectableItemBackground"
+        android:padding="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/overlay_package"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:textColor="?android:textColorPrimary"
+            android:breakStrategy="simple"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="com.android.systemui.tk.zwander.oneuituner.overlay.qs"
+            />
+
+        <LinearLayout
+            android:id="@+id/info_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/overlay_package">
+
+            <TextView
+                android:id="@+id/priority"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Priority: 2"
+                />
+
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/enabled"
+            android:layout_width="0dp"
+            android:layout_height="?android:listPreferredItemHeightSmall"
+            android:text="@string/enabled"
+            android:layout_marginTop="16dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:button="@null"
+            android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
+            android:background="?android:selectableItemBackground"
+            app:layout_constraintTop_toBottomOf="@id/info_wrapper"
+            app:layout_constraintBottom_toTopOf="@id/spacer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
+        <Space
+            android:id="@+id/spacer"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            app:layout_constraintBottom_toTopOf="@id/set_highest_priority"
+            />
+
+        <tk.zwander.overlaymanager.views.TextButton
+            android:id="@+id/set_highest_priority"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/set_highest_priority"
+            app:layout_constraintBottom_toTopOf="@id/set_lowest_priority"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
+        <tk.zwander.overlaymanager.views.TextButton
+            android:id="@+id/set_lowest_priority"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/set_lowest_priority"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

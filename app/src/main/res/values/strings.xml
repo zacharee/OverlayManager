@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">OverlayManager</string>
+
+    <string name="enabled">Enabled</string>
+    <string name="overlay_count">Overlays: %d</string>
+    <string name="priority">Priority: %d</string>
+    <string name="match_overlays">Match Overlays</string>
+
+    <string name="set_highest_priority">Set Highest Priority</string>
+    <string name="set_lowest_priority">Set Lowest Priority</string>
+</resources>
