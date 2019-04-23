@@ -14,6 +14,7 @@ import tk.zwander.overlaymanager.data.TargetData
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.util.DividerItemDecoration
 import tk.zwander.overlaymanager.util.mainHandler
+import java.lang.Exception
 
 class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), SearchView.OnQueryTextListener {
     private val items = SortedList<TargetData>(TargetData::class.java, object : SortedList.Callback<TargetData>() {
@@ -110,16 +111,18 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
             targetSize = items.size
             orig.clear()
 
-            items.forEach { key, value ->
-                val appInfo = packageManager.getApplicationInfo(key, 0)
-                val data = TargetData(
-                    key,
-                    appInfo.loadLabel(packageManager).toString(),
-                    appInfo.loadIcon(packageManager),
-                    value
-                )
+            items.forEach { (key, value) ->
+                try {
+                    val appInfo = packageManager.getApplicationInfo(key, 0)
+                    val data = TargetData(
+                        key,
+                        appInfo.loadLabel(packageManager).toString(),
+                        appInfo.loadIcon(packageManager),
+                        value
+                    )
 
-                orig.add(data)
+                    orig.add(data)
+                } catch (e: Exception) {}
             }
         }
     }
