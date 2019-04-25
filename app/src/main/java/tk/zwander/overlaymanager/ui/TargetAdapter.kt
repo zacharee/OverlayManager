@@ -17,7 +17,7 @@ import tk.zwander.overlaymanager.util.mainHandler
 import java.lang.Exception
 
 class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), SearchView.OnQueryTextListener {
-    private val items = SortedList<TargetData>(TargetData::class.java, object : SortedList.Callback<TargetData>() {
+    val items = SortedList<TargetData>(TargetData::class.java, object : SortedList.Callback<TargetData>() {
         override fun areItemsTheSame(item1: TargetData?, item2: TargetData?) =
             item1 == item2
 
@@ -44,7 +44,7 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
             oldItem.packageName == newItem.packageName
 
     })
-    private val orig = object : ArrayList<TargetData>() {
+    val orig = object : ArrayList<TargetData>() {
         override fun add(element: TargetData): Boolean {
             if (matches(currentQuery, element)) {
                 items.add(element)
@@ -122,7 +122,9 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
                     )
 
                     orig.add(data)
-                } catch (e: Exception) {}
+                } catch (e: Exception) {
+                    targetSize--
+                }
             }
         }
     }

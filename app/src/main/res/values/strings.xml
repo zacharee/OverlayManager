@@ -6,6 +6,9 @@
     <string name="priority">Priority: %d</string>
     <string name="match_overlays">Match Overlays</string>
 
+    <string name="enable_all">Enable All</string>
+    <string name="disable_all">Disable All</string>
+
     <string name="set_highest_priority">Set Highest Priority</string>
     <string name="set_lowest_priority">Set Lowest Priority</string>
 </resources>

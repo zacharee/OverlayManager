@@ -9,6 +9,9 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.RecyclerView
 import com.hmomeni.progresscircula.ProgressCircula
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.ui.TargetAdapter
 import tk.zwander.overlaymanager.util.DividerItemDecoration
@@ -31,6 +34,34 @@ class MainActivity : AppCompatActivity() {
 
                 if (targetAdapter.itemCount == targetAdapter.targetSize) {
                     progress?.visibility = View.GONE
+                    change_all_wrapper.visibility = View.VISIBLE
+
+                    enable_all.setOnClickListener { _ ->
+                        app.receiver.postAction {
+                            GlobalScope.launch {
+                                targetAdapter.orig.forEach { td ->
+                                    td.info.forEach { info ->
+                                        it.setOverlayEnabled(info.packageName, true)
+                                        delay(100)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    disable_all.setOnClickListener { _ ->
+                        app.receiver.postAction {
+                            GlobalScope.launch {
+                                targetAdapter.orig.forEach { td ->
+                                    td.info.forEach { info ->
+                                        it.setOverlayEnabled(info.packageName, false)
+                                        delay(100)
+                                    }
+                                }
+                            }
+                        }
+
+                    }
                 }
             }
         }

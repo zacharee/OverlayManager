@@ -25,7 +25,7 @@ class IOverlayManager {
         val r = invokeMethod<Map<*, *>>(getMethod("getAllOverlays", Int::class.java), -2)
         val ret = HashMap<String, List<OverlayInfo>>()
 
-        r.forEach { key, value ->
+        r.forEach { (key, value) ->
             val l = ArrayList<OverlayInfo>()
 
             (value as List<*>).forEach {
@@ -95,6 +95,7 @@ class IOverlayManager {
     private fun getMethod(methodName: String, vararg args: Class<*>) =
         clazz.getMethod(methodName, *args)
 
-    private fun <T> invokeMethod(method: Method, vararg args: Any) =
-        method.invoke(obj, *args) as T
+    private fun <T> invokeMethod(method: Method, vararg args: Any): T {
+        return method.invoke(obj, *args) as T
+    }
 }
