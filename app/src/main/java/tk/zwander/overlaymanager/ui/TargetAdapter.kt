@@ -1,23 +1,33 @@
 package tk.zwander.overlaymanager.ui
 
+import android.content.Context
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
+import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
+import com.squareup.picasso.Callback
+import com.squareup.picasso.Picasso
+import com.squareup.picasso.Request
+import com.squareup.picasso.RequestHandler
 import kotlinx.android.synthetic.main.target_item.view.*
 import tk.zwander.overlaymanager.R
 import tk.zwander.overlaymanager.data.TargetData
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.util.DividerItemDecoration
-import tk.zwander.overlaymanager.util.mainHandler
 import java.lang.Exception
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
-class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), SearchView.OnQueryTextListener {
-    val items = SortedList<TargetData>(TargetData::class.java, object : SortedList.Callback<TargetData>() {
+class TargetAdapter(private val context: Context, private val batchedUpdates: HashMap<OverlayInfo, Boolean>) : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), SearchView.OnQueryTextListener {
+    val items = SortedList(TargetData::class.java, object : SortedList.Callback<TargetData>() {
         override fun areItemsTheSame(item1: TargetData?, item2: TargetData?) =
             item1 == item2
 
@@ -38,10 +48,10 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
         }
 
         override fun compare(o1: TargetData, o2: TargetData) =
-            o1.label.compareTo(o2.label)
+            o1.getLabel(context).toString().compareTo(o2.getLabel(context).toString())
 
         override fun areContentsTheSame(oldItem: TargetData, newItem: TargetData) =
-            oldItem.packageName == newItem.packageName
+            oldItem.appInfo.packageName == newItem.appInfo.packageName
 
     })
     val orig = object : ArrayList<TargetData>() {
@@ -52,13 +62,18 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
             return super.add(element)
         }
 
+        override fun addAll(elements: Collection<TargetData>): Boolean {
+            items.addAll(elements.filter { matches(currentQuery, it) })
+            return super.addAll(elements)
+        }
+
         override fun remove(element: TargetData): Boolean {
             items.remove(element)
             return super.remove(element)
         }
     }
 
-    private var currentQuery = ""
+    private var currentQuery: String = ""
     private var recyclerView: RecyclerView? = null
 
     var matchOverlays = false
@@ -67,8 +82,6 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
 
             onQueryTextChange(currentQuery)
         }
-
-    var targetSize = 0
 
     override fun onQueryTextChange(newText: String?): Boolean {
         currentQuery = newText ?: ""
@@ -106,32 +119,37 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
         holder.bindInfo(items[position])
     }
 
-    fun setItems(packageManager: PackageManager, items: MutableMap<String, List<OverlayInfo>>) {
-        mainHandler.post {
-            targetSize = items.size
-            orig.clear()
-
-            items.forEach { (key, value) ->
-                try {
-                    val appInfo = packageManager.getApplicationInfo(key, 0)
-                    val data = TargetData(
-                        key,
-                        appInfo.loadLabel(packageManager).toString(),
-                        appInfo.loadIcon(packageManager),
-                        value
-                    )
-
-                    orig.add(data)
-                } catch (e: Exception) {
-                    targetSize--
-                }
-            }
+    fun setAllExpanded(expanded: Boolean) {
+        orig.forEach {
+            it.expanded = expanded
         }
+
+        notifyItemRangeChanged(0, orig.lastIndex)
+    }
+
+    fun setItems(packageManager: PackageManager, items: MutableMap<String, List<OverlayInfo>>, finishListener: () -> Unit) {
+        orig.addAll(
+            items.map {
+                val appInfo = packageManager.getApplicationInfo(it.key, 0)
+                TargetData(
+                    appInfo,
+                    it.value
+                )
+            }
+        )
+
+        finishListener.invoke()
+    }
+
+    fun notifyChanged() {
+        notifyItemRangeChanged(0, orig.lastIndex)
     }
 
     private fun matches(query: String, data: TargetData): Boolean {
-        if (data.label.toLowerCase().contains(query.toLowerCase())
-            || data.packageName.toLowerCase().contains(query.toLowerCase()))
+        if (query.isBlank()) return true
+
+        if (data.getLabel(context).toString().toLowerCase(Locale.getDefault()).contains(query.toLowerCase(Locale.getDefault()))
+            || data.appInfo.packageName.toLowerCase(Locale.getDefault()).contains(query.toLowerCase(Locale.getDefault())))
             return true
 
         if (matchOverlays) {
@@ -144,7 +162,7 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
     }
 
     private fun filter(query: String): List<TargetData> {
-        val lowerCaseQuery = query.toLowerCase()
+        val lowerCaseQuery = query.toLowerCase(Locale.getDefault())
 
         val filteredModelList = ArrayList<TargetData>()
 
@@ -157,16 +175,28 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
         return filteredModelList
     }
 
+    private val picasso = Picasso.Builder(context)
+        .addRequestHandler(AppIconHandler(context))
+        .build()
+
     inner class TargetHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bindInfo(info: TargetData) {
-            val adapter = OverlayAdapter()
+            val adapter = OverlayAdapter(batchedUpdates)
 
-            itemView.target_icon.setImageDrawable(info.icon)
-            itemView.target_label.text = info.label
-            itemView.target_pkg.text = info.packageName
+            val imgView = itemView.target_icon
+
+            picasso
+                .load(Uri.parse("${AppIconHandler.SCHEME}:${info.appInfo.packageName}"))
+                .resize(imgView.maxWidth, imgView.maxHeight)
+                .onlyScaleDown()
+                .centerInside()
+                .into(imgView)
+
+            itemView.target_label.text = info.getLabel(itemView.context)
+            itemView.target_pkg.text = info.appInfo.packageName
             itemView.count.text = itemView.resources.getString(R.string.overlay_count, info.info.size)
             itemView.overlay_list.adapter = adapter
-            itemView.overlay_list.addItemDecoration(DividerItemDecoration(itemView.context, LinearLayoutManager.HORIZONTAL))
+            itemView.overlay_list.addItemDecoration(DividerItemDecoration(itemView.context, LinearLayoutManager.VERTICAL))
 
             itemView.overlay_list.visibility = if (info.expanded) View.VISIBLE else View.GONE
 
@@ -177,6 +207,23 @@ class TargetAdapter : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), Search
 
                 notifyItemChanged(adapterPosition)
             }
+        }
+    }
+
+    class AppIconHandler(private val context: Context) : RequestHandler() {
+        companion object {
+            const val SCHEME = "package"
+        }
+
+        override fun canHandleRequest(data: Request): Boolean {
+            return data.uri != null && data.uri.scheme == SCHEME
+        }
+
+        override fun load(request: Request, networkPolicy: Int): Result? {
+            return Result(
+                context.packageManager.getApplicationIcon(request.uri.schemeSpecificPart).toBitmap(),
+                Picasso.LoadedFrom.DISK
+            )
         }
     }
 }

@@ -8,6 +8,8 @@
 
     <string name="enable_all">Enable All</string>
     <string name="disable_all">Disable All</string>
+    <string name="expand_all">Expand All</string>
+    <string name="collapse_all">Collapse All</string>
 
     <string name="set_highest_priority">Set Highest Priority</string>
     <string name="set_lowest_priority">Set Lowest Priority</string>

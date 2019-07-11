@@ -62,6 +62,8 @@ class OverlayInfo(private val instance: Parcelable) : Parcelable {
     val isEnabled: Boolean
         get() = invokeMethod(getMethod("isEnabled"))
 
+    var showEnabled = isEnabled
+
     private fun <T> getField(fieldName: String) =
             infoClass.getField(fieldName).get(instance) as T
 

@@ -11,7 +11,7 @@ class IOverlayManager {
     private val clazz = Class.forName("android.content.om.IOverlayManager")
     private val stubClass = Class.forName("android.content.om.IOverlayManager\$Stub")
 
-    private val obj = kotlin.run {
+    private val obj = run {
         val svcManClass = Class.forName("android.os.ServiceManager")
         val getService = svcManClass.getMethod("getService", String::class.java)
         val asInterface = stubClass.getMethod("asInterface", IBinder::class.java)

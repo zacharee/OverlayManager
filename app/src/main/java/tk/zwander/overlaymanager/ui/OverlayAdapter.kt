@@ -10,8 +10,8 @@ import tk.zwander.overlaymanager.R
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.util.app
 
-class OverlayAdapter : RecyclerView.Adapter<OverlayAdapter.OverlayHolder>() {
-    private val items = SortedList<OverlayInfo>(OverlayInfo::class.java, object : SortedList.Callback<OverlayInfo>() {
+class OverlayAdapter(private val batchedUpdates: HashMap<OverlayInfo, Boolean>) : RecyclerView.Adapter<OverlayAdapter.OverlayHolder>() {
+    private val items = SortedList(OverlayInfo::class.java, object : SortedList.Callback<OverlayInfo>() {
         override fun areItemsTheSame(item1: OverlayInfo?, item2: OverlayInfo?) =
             item1 == item2
 
@@ -57,23 +57,23 @@ class OverlayAdapter : RecyclerView.Adapter<OverlayAdapter.OverlayHolder>() {
         items.addAll(list)
     }
 
-    class OverlayHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class OverlayHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bindInfo(info: OverlayInfo, size: Int) {
             itemView.apply {
                 val receiver = context.app.receiver
 
                 overlay_package.text = info.packageName
 
+                enabled.setOnCheckedChangeListener(null)
+
                 if (info.isStatic) {
                     enabled.isChecked = true
                     enabled.isEnabled = false
                 } else {
-                    enabled.isChecked = info.isEnabled
+                    enabled.isChecked = info.showEnabled
 
                     enabled.setOnCheckedChangeListener { _, isChecked ->
-                        receiver.postAction {
-                            it.setOverlayEnabled(info.packageName, isChecked)
-                        }
+                        batchedUpdates[items.get(adapterPosition)] = isChecked
                     }
                 }
 
@@ -87,15 +87,15 @@ class OverlayAdapter : RecyclerView.Adapter<OverlayAdapter.OverlayHolder>() {
                     set_highest_priority.setOnClickListener {
                         receiver.postAction {
                             it.setOverlayHighestPriority(info.packageName)
+                            updatePriority(info)
                         }
-                        updatePriority(info)
                     }
 
                     set_lowest_priority.setOnClickListener {
                         receiver.postAction {
                             it.setOverlayLowestPriority(info.packageName)
+                            updatePriority(info)
                         }
-                        updatePriority(info)
                     }
                 } else {
                     set_highest_priority.visibility = View.GONE

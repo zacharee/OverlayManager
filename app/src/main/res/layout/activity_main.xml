@@ -1,53 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <CheckBox
-        android:id="@+id/match_overlays"
-        android:layout_width="match_parent"
-        android:layout_height="?android:listPreferredItemHeightSmall"
-        android:background="?android:selectableItemBackground"
-        android:button="@null"
-        android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
-        android:gravity="center"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="@string/match_overlays"
-        android:visibility="gone" />
-
-    <LinearLayout
-        android:id="@+id/change_all_wrapper"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:visibility="gone"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/enable_all"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/enable_all"
-            />
-
-        <Button
-            android:id="@+id/disable_all"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/disable_all"
-            />
-
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/target_list"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        android:animateLayoutChanges="true"
+        android:layout_marginBottom="?actionBarSize">
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/title_text"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:gravity="center_vertical"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/app_name"
+            />
+
+        <View
+            android:id="@+id/title_border"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/title_border"
+            app:layout_constraintTop_toBottomOf="@id/title_text"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/target_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/title_border"
+            app:layout_constraintBottom_toTopOf="@id/button_bar_border"
+            />
+
+        <View
+            android:id="@+id/button_bar_border"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/title_border"
+            app:layout_constraintTop_toBottomOf="@id/target_list"
+            app:layout_constraintBottom_toTopOf="@id/match_overlays"
+            />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/match_overlays"
+            android:layout_width="match_parent"
+            android:layout_height="?android:listPreferredItemHeightSmall"
+            android:background="?android:selectableItemBackground"
+            android:button="@null"
+            android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
+            android:gravity="center"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="@string/match_overlays"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/button_bar_border"
+            app:layout_constraintBottom_toTopOf="@id/change_all_wrapper"
+            />
+
+
+        <LinearLayout
+            android:id="@+id/change_all_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:visibility="gone"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintTop_toBottomOf="@id/match_overlays"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/enable_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/enable_all"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/disable_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/disable_all"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/expand_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/expand_all"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/collapse_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/collapse_all"
+                />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_gravity="bottom"
+        app:fabAlignmentMode="end"
+        />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/apply"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_anchor="@id/bottom_bar"
+        app:layout_anchorGravity="end"
+        app:srcCompat="@drawable/ic_done_black_24dp"
+        />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -5,4 +5,5 @@
     <color name="colorAccent">#4CAF50</color>
 
     <color name="cardBackground">#353535</color>
+    <color name="title_divider">#33ffffff</color>
 </resources>
