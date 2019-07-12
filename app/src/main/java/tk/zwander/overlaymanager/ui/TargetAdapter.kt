@@ -130,12 +130,16 @@ class TargetAdapter(private val context: Context, private val batchedUpdates: Ha
     fun setItems(packageManager: PackageManager, items: MutableMap<String, List<OverlayInfo>>, finishListener: () -> Unit) {
         orig.addAll(
             items.map {
-                val appInfo = packageManager.getApplicationInfo(it.key, 0)
-                TargetData(
-                    appInfo,
-                    it.value
-                )
-            }
+                try {
+                    val appInfo = packageManager.getApplicationInfo(it.key, 0)
+                    TargetData(
+                        appInfo,
+                        it.value
+                    )
+                } catch (e: Exception) {
+                    null
+                }
+            }.filterNotNull()
         )
 
         finishListener.invoke()
