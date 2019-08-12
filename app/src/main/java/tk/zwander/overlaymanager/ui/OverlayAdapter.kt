@@ -79,7 +79,7 @@ class OverlayAdapter(private val batchedUpdates: HashMap<OverlayInfo, Boolean>) 
                     }
                 }
 
-                updatePriority(info)
+                itemView.priority.text = itemView.context.resources.getString(R.string.priority, info.priority)
 
                 if (size > 1) {
                     set_highest_priority.visibility = View.VISIBLE
@@ -88,15 +88,21 @@ class OverlayAdapter(private val batchedUpdates: HashMap<OverlayInfo, Boolean>) 
 
                     set_highest_priority.setOnClickListener {
                         receiver.postAction {
-                            it.setOverlayHighestPriority(info.packageName)
-                            updatePriority(info)
+                            val newInfo = items[adapterPosition]
+
+                            it.setOverlayHighestPriority(newInfo.packageName)
+                            newInfo.updateInstance(it.getOverlayInfo(newInfo.packageName))
+                            notifyItemChanged(adapterPosition)
                         }
                     }
 
                     set_lowest_priority.setOnClickListener {
                         receiver.postAction {
-                            it.setOverlayLowestPriority(info.packageName)
-                            updatePriority(info)
+                            val newInfo = items[adapterPosition]
+
+                            it.setOverlayLowestPriority(newInfo.packageName)
+                            newInfo.updateInstance(it.getOverlayInfo(newInfo.packageName))
+                            notifyItemChanged(adapterPosition)
                         }
                     }
                 } else {
@@ -105,10 +111,6 @@ class OverlayAdapter(private val batchedUpdates: HashMap<OverlayInfo, Boolean>) 
                     spacer.visibility = View.GONE
                 }
             }
-        }
-
-        private fun updatePriority(info: OverlayInfo) {
-            itemView.priority.text = itemView.context.resources.getString(R.string.priority, info.priority)
         }
     }
 }
