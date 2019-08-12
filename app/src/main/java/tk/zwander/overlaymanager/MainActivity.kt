@@ -74,6 +74,9 @@ class MainActivity : AppCompatActivity() {
                         copy.forEach { (t, u) ->
                             if (t.isEnabled != u) {
                                 it.setOverlayEnabled(t.packageName, u)
+
+                                t.updateInstance(it.getOverlayInfo(t.packageName))
+                                targetAdapter.notifyChanged()
                             }
                         }
                     }

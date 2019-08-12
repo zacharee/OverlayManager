@@ -23,6 +23,12 @@ object RootBridge {
         override fun getAllOverlays(): MutableMap<String, List<OverlayInfo>> =
             om.getAllOverlays()
 
+        override fun getOverlayInfosForTarget(packageName: String): List<OverlayInfo> =
+            om.getOverlayInfosForTarget(packageName)
+
+        override fun getOverlayInfo(packageName: String) =
+            om.getOverlayInfo(packageName)
+
         override fun setOverlayEnabled(packageName: String, enabled: Boolean) =
             om.setEnabled(packageName, enabled)
 

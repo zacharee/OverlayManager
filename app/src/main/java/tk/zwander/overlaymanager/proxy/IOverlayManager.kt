@@ -47,13 +47,11 @@ class IOverlayManager {
         ).map { OverlayInfo(it as Parcelable) }
 
     fun getOverlayInfo(packageName: String) =
-        OverlayInfo(
-            invokeMethod(
-                getMethod(
-                    "getOverlayInfo",
-                    String::class.java, Int::class.java
-                ), packageName, -2
-            )
+        invokeMethod<android.content.om.OverlayInfo>(
+            getMethod(
+                "getOverlayInfo",
+                String::class.java, Int::class.java
+            ), packageName, -2
         )
 
     fun setEnabled(packageName: String, enable: Boolean) =

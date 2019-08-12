@@ -1,5 +1,6 @@
 package tk.zwander.overlaymanager.ui
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -73,7 +74,8 @@ class OverlayAdapter(private val batchedUpdates: HashMap<OverlayInfo, Boolean>) 
                     enabled.isChecked = info.showEnabled
 
                     enabled.setOnCheckedChangeListener { _, isChecked ->
-                        batchedUpdates[items.get(adapterPosition)] = isChecked
+                        val item = items.get(adapterPosition)
+                        batchedUpdates[item] = isChecked
                     }
                 }
 

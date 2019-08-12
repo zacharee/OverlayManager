@@ -2,13 +2,14 @@ package tk.zwander.overlaymanager.proxy
 
 import android.annotation.SuppressLint
 import android.os.Parcelable
+import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import java.lang.reflect.Method
 
 @Suppress("UNCHECKED_CAST")
 @SuppressLint("PrivateApi")
 @Parcelize
-class OverlayInfo(private val instance: Parcelable) : Parcelable {
+class OverlayInfo(private var instance: Parcelable) : Parcelable {
     companion object {
         private val infoClass = Class.forName("android.content.om.OverlayInfo")
 
@@ -62,7 +63,13 @@ class OverlayInfo(private val instance: Parcelable) : Parcelable {
     val isEnabled: Boolean
         get() = invokeMethod(getMethod("isEnabled"))
 
+    @IgnoredOnParcel
     var showEnabled = isEnabled
+
+    fun updateInstance(instance: Parcelable) {
+        this.instance = instance
+        showEnabled = isEnabled
+    }
 
     private fun <T> getField(fieldName: String) =
             infoClass.getField(fieldName).get(instance) as T
