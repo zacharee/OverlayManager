@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
@@ -14,20 +15,25 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hmomeni.progresscircula.ProgressCircula
 import kotlinx.android.synthetic.main.activity_main.*
+import tk.zwander.overlaymanager.data.ObservableHashMap
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.ui.TargetAdapter
 import tk.zwander.overlaymanager.util.DividerItemDecoration
 import tk.zwander.overlaymanager.util.app
 import tk.zwander.overlaymanager.util.layoutTransition
+import java.util.*
+import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity() {
-    private val batchedUpdates = HashMap<OverlayInfo, Boolean>()
+    private val batchedUpdates = ObservableHashMap<OverlayInfo, Boolean>()
     private val targetAdapter by lazy { TargetAdapter(this, batchedUpdates) }
     private val imm by lazy { getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager }
 
-    private var progress: ProgressCircula? = null
+    private var progressItem: MenuItem? = null
+    private var unappliedAlert: MenuItem? = null
     private var doneLoading = false
     private var searchView: SearchView? = null
 
@@ -61,7 +67,7 @@ class MainActivity : AppCompatActivity() {
                 it.allOverlays as MutableMap<String, List<OverlayInfo>>
             ) {
                 doneLoading = true
-                progress?.isVisible = false
+                progressItem?.isVisible = false
                 change_all_wrapper.isVisible = true
 
                 apply.isVisible = true
@@ -146,9 +152,24 @@ class MainActivity : AppCompatActivity() {
 
         searchView?.setOnQueryTextListener(targetAdapter)
 
-        progress = menu.findItem(R.id.progress).actionView as ProgressCircula?
+        progressItem = menu.findItem(R.id.progress)
         if (doneLoading) {
-            progress?.isVisible = false
+            progressItem?.isVisible = false
+        }
+
+        unappliedAlert = menu.findItem(R.id.unappliedChanges)
+        unappliedAlert?.isVisible = batchedUpdates.isNotEmpty()
+        unappliedAlert?.setOnMenuItemClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.unapplied_changes)
+                .setMessage(R.string.unapplied_changes_desc)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+            true
+        }
+
+        batchedUpdates.addObserver { _, _ ->
+            unappliedAlert?.isVisible = batchedUpdates.isNotEmpty()
         }
 
         return true

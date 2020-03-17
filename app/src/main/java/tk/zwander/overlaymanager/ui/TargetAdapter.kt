@@ -27,7 +27,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class TargetAdapter(private val context: Context, private val batchedUpdates: HashMap<OverlayInfo, Boolean>) : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), SearchView.OnQueryTextListener {
+class TargetAdapter(private val context: Context, private val batchedUpdates: MutableMap<OverlayInfo, Boolean>) : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), SearchView.OnQueryTextListener {
     val items = SortedList(TargetData::class.java, object : SortedList.Callback<TargetData>() {
         override fun areItemsTheSame(item1: TargetData?, item2: TargetData?) =
             item1 == item2

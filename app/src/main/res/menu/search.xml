@@ -10,6 +10,14 @@
         />
 
     <item
+        android:id="@+id/unappliedChanges"
+        android:title="@string/unapplied_changes"
+        android:icon="@drawable/ic_baseline_error_24"
+        android:visible="false"
+        app:showAsAction="always"
+        />
+
+    <item
         android:id="@+id/action_search"
         android:title="@android:string/search_go"
         app:actionViewClass="androidx.appcompat.widget.SearchView"

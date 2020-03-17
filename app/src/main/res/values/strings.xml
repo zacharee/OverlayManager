@@ -6,6 +6,9 @@
     <string name="priority">Priority: %d</string>
     <string name="match_overlays">Match Overlays</string>
     <string name="apply_changes">Apply Changes</string>
+    <string name="unapplied_changes">Unapplied Changes</string>
+
+    <string name="unapplied_changes_desc">You have unapplied changes! Hit the checkmark FAB to apply them.</string>
 
     <string name="enable_all">Enable All</string>
     <string name="disable_all">Disable All</string>

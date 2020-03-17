@@ -12,7 +12,7 @@ import tk.zwander.overlaymanager.R
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.util.app
 
-class OverlayAdapter(private val batchedUpdates: HashMap<OverlayInfo, Boolean>) : RecyclerView.Adapter<OverlayAdapter.OverlayHolder>() {
+class OverlayAdapter(private val batchedUpdates: MutableMap<OverlayInfo, Boolean>) : RecyclerView.Adapter<OverlayAdapter.OverlayHolder>() {
     private val items = SortedList(OverlayInfo::class.java, object : SortedList.Callback<OverlayInfo>() {
         override fun areItemsTheSame(item1: OverlayInfo?, item2: OverlayInfo?) =
             item1 == item2
