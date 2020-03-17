@@ -72,19 +72,26 @@ class MainActivity : AppCompatActivity() {
 
                 apply.isVisible = true
                 apply.setOnClickListener {
-                    app.receiver.postAction {
-                        val copy = HashMap(batchedUpdates)
-                        batchedUpdates.clear()
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.apply_changes)
+                        .setMessage(R.string.apply_overlays_desc)
+                        .setPositiveButton(android.R.string.yes) {_, _ ->
+                            app.receiver.postAction {
+                                val copy = HashMap(batchedUpdates)
+                                batchedUpdates.clear()
 
-                        copy.forEach { (t, u) ->
-                            if (t.isEnabled != u) {
-                                it.setOverlayEnabled(t.packageName, u)
+                                copy.forEach { (t, u) ->
+                                    if (t.isEnabled != u) {
+                                        it.setOverlayEnabled(t.packageName, u)
 
-                                t.updateInstance(it.getOverlayInfo(t.packageName))
-                                targetAdapter.notifyChanged()
+                                        t.updateInstance(it.getOverlayInfo(t.packageName))
+                                        targetAdapter.notifyChanged()
+                                    }
+                                }
                             }
                         }
-                    }
+                        .setNegativeButton(android.R.string.no, null)
+                        .show()
                 }
 
                 enable_all.setOnClickListener {
