@@ -32,7 +32,7 @@ class App : Application() {
         }
 
         GlobalScope.launch {
-            Shell.SU.run(
+            Shell.Pool.SU.run(
                 RootJava.getLaunchScript(
                     this@App,
                     RootBridge::class.java,

@@ -6,8 +6,9 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import androidx.appcompat.widget.AppCompatButton
 
-class TextButton : Button {
+class TextButton : AppCompatButton {
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
 
