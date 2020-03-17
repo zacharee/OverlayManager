@@ -127,6 +127,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
+        android:contentDescription="@string/apply_changes"
+        android:tooltipText="@string/apply_changes"
         app:layout_anchor="@id/bottom_bar"
         app:layout_anchorGravity="end"
         app:srcCompat="@drawable/ic_done_black_24dp"

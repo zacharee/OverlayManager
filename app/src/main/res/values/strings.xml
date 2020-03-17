@@ -5,6 +5,7 @@
     <string name="overlay_count">Overlays: %d</string>
     <string name="priority">Priority: %d</string>
     <string name="match_overlays">Match Overlays</string>
+    <string name="apply_changes">Apply Changes</string>
 
     <string name="enable_all">Enable All</string>
     <string name="disable_all">Disable All</string>
