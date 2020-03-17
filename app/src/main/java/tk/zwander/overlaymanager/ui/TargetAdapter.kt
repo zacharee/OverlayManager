@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
@@ -202,7 +203,7 @@ class TargetAdapter(private val context: Context, private val batchedUpdates: Ha
             itemView.overlay_list.adapter = adapter
             itemView.overlay_list.addItemDecoration(DividerItemDecoration(itemView.context, LinearLayoutManager.VERTICAL))
 
-            itemView.overlay_list.visibility = if (info.expanded) View.VISIBLE else View.GONE
+            itemView.overlay_list.isVisible = info.expanded
 
             adapter.setItems(info.info)
 

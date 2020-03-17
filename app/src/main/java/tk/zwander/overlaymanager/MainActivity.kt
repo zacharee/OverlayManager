@@ -11,14 +11,11 @@ import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hmomeni.progresscircula.ProgressCircula
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.ui.TargetAdapter
 import tk.zwander.overlaymanager.util.DividerItemDecoration
@@ -31,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private val imm by lazy { getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager }
 
     private var progress: ProgressCircula? = null
+    private var doneLoading = false
     private var searchView: SearchView? = null
 
     private val layoutListener = ViewTreeObserver.OnGlobalLayoutListener {
@@ -62,10 +60,11 @@ class MainActivity : AppCompatActivity() {
                 packageManager,
                 it.allOverlays as MutableMap<String, List<OverlayInfo>>
             ) {
-                progress?.visibility = View.GONE
-                change_all_wrapper.visibility = View.VISIBLE
+                doneLoading = true
+                progress?.isVisible = false
+                change_all_wrapper.isVisible = true
 
-                apply.visibility = View.VISIBLE
+                apply.isVisible = true
                 apply.setOnClickListener {
                     app.receiver.postAction {
                         val copy = HashMap(batchedUpdates)
@@ -137,28 +136,31 @@ class MainActivity : AppCompatActivity() {
         searchView = searchItem?.actionView as SearchView?
 
         searchView?.setOnSearchClickListener {
-            match_overlays.visibility = View.VISIBLE
+            match_overlays.isVisible = true
         }
 
         searchView?.setOnCloseListener {
-            match_overlays.visibility = View.GONE
+            match_overlays.isVisible = false
             false
         }
 
         searchView?.setOnQueryTextListener(targetAdapter)
 
         progress = menu.findItem(R.id.progress).actionView as ProgressCircula?
+        if (doneLoading) {
+            progress?.isVisible = false
+        }
 
         return true
     }
 
     private fun onKeyboardOpen() {
-        title_text.visibility = View.GONE
-        title_border.visibility = View.GONE
+        title_text.isVisible = false
+        title_border.isVisible = false
     }
 
     private fun onKeyboardClose() {
-        title_text.visibility = View.VISIBLE
-        title_border.visibility = View.VISIBLE
+        title_text.isVisible = true
+        title_border.isVisible = true
     }
 }

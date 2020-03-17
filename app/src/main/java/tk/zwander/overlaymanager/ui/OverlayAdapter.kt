@@ -4,6 +4,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import kotlinx.android.synthetic.main.overlay_item.view.*
@@ -82,9 +83,9 @@ class OverlayAdapter(private val batchedUpdates: HashMap<OverlayInfo, Boolean>) 
                 itemView.priority.text = itemView.context.resources.getString(R.string.priority, info.priority)
 
                 if (size > 1) {
-                    set_highest_priority.visibility = View.VISIBLE
-                    set_lowest_priority.visibility = View.VISIBLE
-                    spacer.visibility = View.VISIBLE
+                    set_highest_priority.isVisible = true
+                    set_lowest_priority.isVisible = true
+                    spacer.isVisible = true
 
                     set_highest_priority.setOnClickListener {
                         receiver.postAction {
@@ -106,9 +107,9 @@ class OverlayAdapter(private val batchedUpdates: HashMap<OverlayInfo, Boolean>) 
                         }
                     }
                 } else {
-                    set_highest_priority.visibility = View.GONE
-                    set_lowest_priority.visibility = View.GONE
-                    spacer.visibility = View.GONE
+                    set_highest_priority.isVisible = false
+                    set_lowest_priority.isVisible = false
+                    spacer.isVisible = false
                 }
             }
         }
