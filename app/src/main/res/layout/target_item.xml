@@ -72,5 +72,4 @@
         tools:listitem="@layout/overlay_item"
         />
 
-
 </androidx.constraintlayout.widget.ConstraintLayout>

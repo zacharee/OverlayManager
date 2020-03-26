@@ -49,49 +49,50 @@
 
         </LinearLayout>
 
-        <CheckBox
-            android:id="@+id/enabled"
-            android:layout_width="0dp"
-            android:layout_height="?android:listPreferredItemHeightSmall"
-            android:text="@string/enabled"
-            android:layout_marginTop="16dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:button="@null"
-            android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
-            android:background="?android:selectableItemBackground"
-            app:layout_constraintTop_toBottomOf="@id/info_wrapper"
-            app:layout_constraintBottom_toTopOf="@id/spacer"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            />
-
-        <Space
-            android:id="@+id/spacer"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="16dp"
-            app:layout_constraintBottom_toTopOf="@id/set_highest_priority"
-            />
+            android:layout_height="?listPreferredItemHeightSmall"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@id/info_wrapper">
 
-        <tk.zwander.overlaymanager.views.TextButton
-            android:id="@+id/set_highest_priority"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/set_highest_priority"
-            app:layout_constraintBottom_toTopOf="@id/set_lowest_priority"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            />
+            <tk.zwander.overlaymanager.views.TooltippedImageButton
+                android:id="@+id/set_highest_priority"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/highest_priority_selector"
+                android:background="?android:selectableItemBackground"
+                android:tooltipText="@string/set_highest_priority"
+                android:contentDescription="@string/set_highest_priority"
+                />
 
-        <tk.zwander.overlaymanager.views.TextButton
-            android:id="@+id/set_lowest_priority"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/set_lowest_priority"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            />
+            <tk.zwander.overlaymanager.views.TooltippedImageButton
+                android:id="@+id/set_lowest_priority"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/lowest_priority_selector"
+                android:background="?android:selectableItemBackground"
+                android:tooltipText="@string/set_lowest_priority"
+                android:contentDescription="@string/set_lowest_priority"
+                />
+
+            <tk.zwander.overlaymanager.views.CheckableImageButton
+                android:id="@+id/enabled"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_weight="1"
+                android:tooltipText="@string/enabled"
+                android:contentDescription="@string/enabled"
+                android:background="?android:selectableItemBackground"
+                android:src="?android:attr/listChoiceIndicatorMultiple"
+                />
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

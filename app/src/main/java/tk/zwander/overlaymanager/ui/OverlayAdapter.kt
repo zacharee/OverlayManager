@@ -82,11 +82,10 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<OverlayInfo, Boolean
 
                 itemView.priority.text = itemView.context.resources.getString(R.string.priority, info.priority)
 
-                if (size > 1) {
-                    set_highest_priority.isVisible = true
-                    set_lowest_priority.isVisible = true
-                    spacer.isVisible = true
+                set_highest_priority.isEnabled = size > 1
+                set_lowest_priority.isEnabled = size > 1
 
+                if (size > 1) {
                     set_highest_priority.setOnClickListener {
                         receiver.postAction {
                             val newInfo = items[adapterPosition]
@@ -106,10 +105,6 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<OverlayInfo, Boolean
                             notifyItemChanged(adapterPosition)
                         }
                     }
-                } else {
-                    set_highest_priority.isVisible = false
-                    set_lowest_priority.isVisible = false
-                    spacer.isVisible = false
                 }
             }
         }
