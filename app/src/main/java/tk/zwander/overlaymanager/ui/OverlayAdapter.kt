@@ -8,11 +8,15 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import kotlinx.android.synthetic.main.overlay_item.view.*
+import tk.zwander.overlaymanager.IRootBridge
 import tk.zwander.overlaymanager.R
+import tk.zwander.overlaymanager.data.BatchedUpdate
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.util.app
+import tk.zwander.overlaymanager.util.createEnabledUpdate
+import tk.zwander.overlaymanager.util.createPriorityUpdate
 
-class OverlayAdapter(private val batchedUpdates: MutableMap<OverlayInfo, Boolean>) : RecyclerView.Adapter<OverlayAdapter.OverlayHolder>() {
+class OverlayAdapter(private val batchedUpdates: MutableMap<String, BatchedUpdate>) : RecyclerView.Adapter<OverlayAdapter.OverlayHolder>() {
     private val items = SortedList(OverlayInfo::class.java, object : SortedList.Callback<OverlayInfo>() {
         override fun areItemsTheSame(item1: OverlayInfo?, item2: OverlayInfo?) =
             item1 == item2
@@ -62,8 +66,6 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<OverlayInfo, Boolean
     inner class OverlayHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bindInfo(info: OverlayInfo, size: Int) {
             itemView.apply {
-                val receiver = context.app.receiver
-
                 overlay_package.text = info.packageName
 
                 enabled.setOnCheckedChangeListener(null)
@@ -76,7 +78,9 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<OverlayInfo, Boolean
 
                     enabled.setOnCheckedChangeListener { _, isChecked ->
                         val item = items.get(adapterPosition)
-                        batchedUpdates[item] = isChecked
+                        val update = item.createEnabledUpdate(isChecked)
+
+                        batchedUpdates[update.first] = update.second
                     }
                 }
 
@@ -87,23 +91,21 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<OverlayInfo, Boolean
 
                 if (size > 1) {
                     set_highest_priority.setOnClickListener {
-                        receiver.postAction {
-                            val newInfo = items[adapterPosition]
-
-                            it.setOverlayHighestPriority(newInfo.packageName)
-                            newInfo.updateInstance(it.getOverlayInfo(newInfo.packageName))
+                        val item = items[adapterPosition]
+                        val update = item.createPriorityUpdate(true) {
                             notifyItemChanged(adapterPosition)
                         }
+
+                        batchedUpdates[update.first] = update.second
                     }
 
                     set_lowest_priority.setOnClickListener {
-                        receiver.postAction {
-                            val newInfo = items[adapterPosition]
-
-                            it.setOverlayLowestPriority(newInfo.packageName)
-                            newInfo.updateInstance(it.getOverlayInfo(newInfo.packageName))
+                        val item = items[adapterPosition]
+                        val update = item.createPriorityUpdate(false) {
                             notifyItemChanged(adapterPosition)
                         }
+
+                        batchedUpdates[update.first] = update.second
                     }
                 }
             }

@@ -18,17 +18,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hmomeni.progresscircula.ProgressCircula
 import kotlinx.android.synthetic.main.activity_main.*
+import tk.zwander.overlaymanager.data.BatchedUpdate
 import tk.zwander.overlaymanager.data.ObservableHashMap
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.ui.TargetAdapter
 import tk.zwander.overlaymanager.util.DividerItemDecoration
 import tk.zwander.overlaymanager.util.app
+import tk.zwander.overlaymanager.util.createEnabledUpdate
 import tk.zwander.overlaymanager.util.layoutTransition
 import java.util.*
 import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity() {
-    private val batchedUpdates = ObservableHashMap<OverlayInfo, Boolean>()
+    private val batchedUpdates = ObservableHashMap<String, BatchedUpdate>()
     private val targetAdapter by lazy { TargetAdapter(this, batchedUpdates) }
     private val imm by lazy { getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager }
 
@@ -80,14 +82,19 @@ class MainActivity : AppCompatActivity() {
                                 val copy = HashMap(batchedUpdates)
                                 batchedUpdates.clear()
 
-                                copy.forEach { (t, u) ->
-                                    if (t.isEnabled != u) {
-                                        it.setOverlayEnabled(t.packageName, u)
-
-                                        t.updateInstance(it.getOverlayInfo(t.packageName))
-                                        targetAdapter.notifyChanged()
-                                    }
+                                copy.forEach { (_, u) ->
+                                    u(it)
+                                    targetAdapter.notifyChanged()
                                 }
+
+//                                copy.forEach { (t, u) ->
+//                                    if (t.isEnabled != u) {
+//                                        it.setOverlayEnabled(t.packageName, u)
+//
+//                                        t.updateInstance(it.getOverlayInfo(t.packageName))
+//                                        targetAdapter.notifyChanged()
+//                                    }
+//                                }
                             }
                         }
                         .setNegativeButton(android.R.string.no, null)
@@ -97,7 +104,9 @@ class MainActivity : AppCompatActivity() {
                 enable_all.setOnClickListener {
                     targetAdapter.orig.forEach { td ->
                         td.info.forEach { info ->
-                            batchedUpdates[info] = true
+                            val i = info.createEnabledUpdate(true)
+                            batchedUpdates[i.first] = i.second
+
                             info.showEnabled = true
                         }
                     }
@@ -107,7 +116,9 @@ class MainActivity : AppCompatActivity() {
                 disable_all.setOnClickListener {
                     targetAdapter.orig.forEach { td ->
                         td.info.forEach { info ->
-                            batchedUpdates[info] = false
+                            val i = info.createEnabledUpdate(false)
+                            batchedUpdates[i.first] = i.second
+
                             info.showEnabled = false
                         }
                     }
