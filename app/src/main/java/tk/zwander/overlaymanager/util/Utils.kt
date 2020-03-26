@@ -16,8 +16,6 @@ import kotlin.coroutines.coroutineContext
 val Context.app: App
     get() = applicationContext as App
 
-val mainScope = CoroutineScope(Dispatchers.Main)
-
 val layoutTransition = LayoutTransition().apply {
     enableTransitionType(LayoutTransition.CHANGING)
 }

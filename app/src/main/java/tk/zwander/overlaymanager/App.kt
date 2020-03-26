@@ -6,10 +6,11 @@ import android.os.Build
 import eu.chainfire.librootjava.RootIPCReceiver
 import eu.chainfire.librootjava.RootJava
 import eu.chainfire.libsuperuser.Shell
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import tk.zwander.overlaymanager.root.RootBridge
-import tk.zwander.overlaymanager.util.mainScope
 import java.lang.reflect.Method
 
 class App : Application() {
@@ -47,14 +48,14 @@ class App : Application() {
         receiver.setContext(this)
     }
 
-    class Receiver(context: Context) : RootIPCReceiver<IRootBridge>(context, 0, IRootBridge::class.java) {
+    class Receiver(context: Context) : RootIPCReceiver<IRootBridge>(context, 0, IRootBridge::class.java), CoroutineScope by MainScope() {
         private val queuedActions = ArrayList<(IRootBridge) -> Unit>()
 
         private val ipcLock = Any()
 
         private var ipc: IRootBridge? = null
             set(value) {
-                mainScope.launch {
+                launch {
                     synchronized(ipcLock) {
                         field = value
 
