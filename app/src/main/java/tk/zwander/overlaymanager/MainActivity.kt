@@ -153,10 +153,12 @@ class MainActivity : AppCompatActivity() {
 
         searchView?.setOnSearchClickListener {
             match_overlays.isVisible = true
+            change_all_wrapper.isVisible = false
         }
 
         searchView?.setOnCloseListener {
             match_overlays.isVisible = false
+            change_all_wrapper.isVisible = true
             false
         }
 

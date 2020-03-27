@@ -64,11 +64,12 @@
             android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
             android:gravity="center"
             android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:paddingEnd="80dp"
             android:text="@string/match_overlays"
             android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/button_bar_border"
             app:layout_constraintBottom_toTopOf="@id/change_all_wrapper"
+            tools:visibility="visible"
             />
 
 
