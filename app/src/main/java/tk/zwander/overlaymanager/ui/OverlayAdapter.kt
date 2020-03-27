@@ -38,7 +38,7 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<String, BatchedUpdat
         }
 
         override fun compare(o1: OverlayInfo, o2: OverlayInfo) =
-            o1.packageName.compareTo(o2.packageName)
+            if (o1.showEnabled && !o2.showEnabled) -1 else if (!o1.showEnabled && o2.showEnabled) 1 else o1.packageName.compareTo(o2.packageName)
 
         override fun areContentsTheSame(oldItem: OverlayInfo, newItem: OverlayInfo) =
             oldItem.packageName == newItem.packageName
@@ -81,6 +81,8 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<String, BatchedUpdat
                         val update = item.createEnabledUpdate(isChecked)
 
                         batchedUpdates[update.first] = update.second
+                        item.showEnabled = isChecked
+                        items.recalculatePositionOfItemAt(adapterPosition)
                     }
                 }
 
