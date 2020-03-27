@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.Toast
+import it.sephiroth.android.library.xtooltip.ClosePolicy
 import it.sephiroth.android.library.xtooltip.Tooltip
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -25,17 +26,18 @@ val layoutTransition = LayoutTransition().apply {
 }
 
 fun View.addTooltip() {
-    val tooltip = Tooltip.Builder(context)
-        .anchor(this)
-        .text(tooltipText)
-        .arrow(false)
-        .showDuration(4000L)
-        .animationStyle(0)
-        .floatingAnimation(null)
+    if (tooltipText != null) {
+        val tooltip = Tooltip.Builder(context)
+            .anchor(this)
+            .text(tooltipText)
+            .arrow(false)
+            .showDuration(4000L)
+            .closePolicy(ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME)
 
-    setOnLongClickListener {
-        tooltip.create().show(rootView, Tooltip.Gravity.TOP)
-        true
+        setOnLongClickListener {
+            tooltip.create().show(rootView, Tooltip.Gravity.TOP)
+            true
+        }
     }
 }
 
