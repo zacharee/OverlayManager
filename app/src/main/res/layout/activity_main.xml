@@ -138,8 +138,16 @@
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
         android:layout_gravity="bottom"
-        app:fabAlignmentMode="end"
-        />
+        android:gravity="center_vertical|start"
+        app:fabAlignmentMode="end">
+
+        <androidx.appcompat.widget.ActionMenuView
+            android:id="@+id/action_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="?actionBarSize"
+            />
+
+    </com.google.android.material.bottomappbar.BottomAppBar>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/apply"

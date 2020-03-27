@@ -71,8 +71,8 @@ class MainActivity : AppCompatActivity() {
                 doneLoading = true
                 progressItem?.isVisible = false
                 change_all_wrapper.isVisible = true
-
                 apply.isVisible = true
+
                 apply.setOnClickListener {
                     MaterialAlertDialogBuilder(this)
                         .setTitle(R.string.apply_changes)
@@ -145,7 +145,8 @@ class MainActivity : AppCompatActivity() {
         super.setTitle(null)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+    override fun onCreateOptionsMenu(m: Menu): Boolean {
+        val menu = action_menu.menu
         menuInflater.inflate(R.menu.search, menu)
 
         val searchItem = menu.findItem(R.id.action_search)
@@ -181,7 +182,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         batchedUpdates.addObserver { _, _ ->
-            unappliedAlert?.isVisible = batchedUpdates.isNotEmpty()
+            val notEmpty = batchedUpdates.isNotEmpty()
+            unappliedAlert?.isVisible = notEmpty
         }
 
         return true
