@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hmomeni.progresscircula.ProgressCircula
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.*
 import tk.zwander.overlaymanager.data.BatchedUpdate
 import tk.zwander.overlaymanager.data.ObservableHashMap
 import tk.zwander.overlaymanager.proxy.OverlayInfo
@@ -29,7 +30,7 @@ import tk.zwander.overlaymanager.util.layoutTransition
 import java.util.*
 import kotlin.collections.HashMap
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private val batchedUpdates = ObservableHashMap<String, BatchedUpdate>()
     private val targetAdapter by lazy { TargetAdapter(this, batchedUpdates) }
     private val imm by lazy { getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager }
@@ -64,65 +65,69 @@ class MainActivity : AppCompatActivity() {
         }
 
         app.receiver.postAction {
-            targetAdapter.setItems(
-                packageManager,
-                it.allOverlays as MutableMap<String, List<OverlayInfo>>
-            ) {
-                doneLoading = true
-                progressItem?.isVisible = false
-                change_all_wrapper.isVisible = true
-                apply.isVisible = true
+            launch(Dispatchers.IO) {
+                targetAdapter.setItems(
+                    packageManager,
+                    it.allOverlays as MutableMap<String, List<OverlayInfo>>
+                ) {
+                    launch(Dispatchers.Main) {
+                        doneLoading = true
+                        progressItem?.isVisible = false
+                        change_all_wrapper.isVisible = true
+                        apply.isVisible = true
 
-                apply.setOnClickListener {
-                    MaterialAlertDialogBuilder(this)
-                        .setTitle(R.string.apply_changes)
-                        .setMessage(R.string.apply_overlays_desc)
-                        .setPositiveButton(android.R.string.yes) {_, _ ->
-                            app.receiver.postAction {
-                                val copy = HashMap(batchedUpdates)
-                                batchedUpdates.clear()
+                        apply.setOnClickListener {
+                            MaterialAlertDialogBuilder(this@MainActivity)
+                                .setTitle(R.string.apply_changes)
+                                .setMessage(R.string.apply_overlays_desc)
+                                .setPositiveButton(android.R.string.yes) {_, _ ->
+                                    app.receiver.postAction {
+                                        val copy = HashMap(batchedUpdates)
+                                        batchedUpdates.clear()
 
-                                copy.forEach { (_, u) ->
-                                    u(it)
+                                        copy.forEach { (_, u) ->
+                                            u(it)
+                                        }
+
+                                        targetAdapter.notifyChanged()
+                                    }
                                 }
+                                .setNegativeButton(android.R.string.no, null)
+                                .show()
+                        }
 
-                                targetAdapter.notifyChanged()
+                        enable_all.setOnClickListener {
+                            targetAdapter.orig.forEach { td ->
+                                td.info.forEach { info ->
+                                    val i = info.createEnabledUpdate(true)
+                                    batchedUpdates[i.first] = i.second
+
+                                    info.showEnabled = true
+                                }
                             }
+                            targetAdapter.notifyChanged()
                         }
-                        .setNegativeButton(android.R.string.no, null)
-                        .show()
-                }
 
-                enable_all.setOnClickListener {
-                    targetAdapter.orig.forEach { td ->
-                        td.info.forEach { info ->
-                            val i = info.createEnabledUpdate(true)
-                            batchedUpdates[i.first] = i.second
+                        disable_all.setOnClickListener {
+                            targetAdapter.orig.forEach { td ->
+                                td.info.forEach { info ->
+                                    val i = info.createEnabledUpdate(false)
+                                    batchedUpdates[i.first] = i.second
 
-                            info.showEnabled = true
+                                    info.showEnabled = false
+                                }
+                            }
+                            targetAdapter.notifyChanged()
                         }
-                    }
-                    targetAdapter.notifyChanged()
-                }
 
-                disable_all.setOnClickListener {
-                    targetAdapter.orig.forEach { td ->
-                        td.info.forEach { info ->
-                            val i = info.createEnabledUpdate(false)
-                            batchedUpdates[i.first] = i.second
+                        expand_all.setOnClickListener {
+                            targetAdapter.setAllExpanded(true)
+                        }
 
-                            info.showEnabled = false
+                        collapse_all.setOnClickListener {
+                            targetAdapter.setAllExpanded(false)
                         }
                     }
-                    targetAdapter.notifyChanged()
-                }
-
-                expand_all.setOnClickListener {
-                    targetAdapter.setAllExpanded(true)
-                }
-
-                collapse_all.setOnClickListener {
-                    targetAdapter.setAllExpanded(false)
                 }
             }
         }
@@ -133,6 +138,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
+        cancel()
         content.viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
     }
 

@@ -16,6 +16,10 @@ import com.squareup.picasso.Picasso
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
 import kotlinx.android.synthetic.main.target_item.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import tk.zwander.overlaymanager.R
 import tk.zwander.overlaymanager.data.BatchedUpdate
 import tk.zwander.overlaymanager.data.TargetData
@@ -25,25 +29,37 @@ import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
 
-class TargetAdapter(private val context: Context, private val batchedUpdates: MutableMap<String, BatchedUpdate>) : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), SearchView.OnQueryTextListener {
+class TargetAdapter(
+    private val context: Context,
+    private val batchedUpdates: MutableMap<String, BatchedUpdate>
+) : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), SearchView.OnQueryTextListener,
+    CoroutineScope by MainScope() {
     val items = SortedList(TargetData::class.java, object : SortedList.Callback<TargetData>() {
         override fun areItemsTheSame(item1: TargetData?, item2: TargetData?) =
             item1 == item2
 
         override fun onMoved(fromPosition: Int, toPosition: Int) {
-            notifyItemMoved(fromPosition, toPosition)
+            launch {
+                notifyItemMoved(fromPosition, toPosition)
+            }
         }
 
         override fun onChanged(position: Int, count: Int) {
-            notifyItemRangeChanged(position, count)
+            launch {
+                notifyItemRangeChanged(position, count)
+            }
         }
 
         override fun onInserted(position: Int, count: Int) {
-            notifyItemRangeInserted(position, count)
+            launch {
+                notifyItemRangeInserted(position, count)
+            }
         }
 
         override fun onRemoved(position: Int, count: Int) {
-            notifyItemRangeRemoved(position, count)
+            launch {
+                notifyItemRangeRemoved(position, count)
+            }
         }
 
         override fun compare(o1: TargetData, o2: TargetData) =
@@ -102,6 +118,7 @@ class TargetAdapter(private val context: Context, private val batchedUpdates: Mu
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         this.recyclerView = null
+        cancel()
         super.onDetachedFromRecyclerView(recyclerView)
     }
 
@@ -126,7 +143,11 @@ class TargetAdapter(private val context: Context, private val batchedUpdates: Mu
         notifyDataSetChanged()
     }
 
-    fun setItems(packageManager: PackageManager, items: MutableMap<String, List<OverlayInfo>>, finishListener: () -> Unit) {
+    fun setItems(
+        packageManager: PackageManager,
+        items: MutableMap<String, List<OverlayInfo>>,
+        finishListener: () -> Unit
+    ) {
         orig.addAll(
             items.map {
                 try {
@@ -151,8 +172,11 @@ class TargetAdapter(private val context: Context, private val batchedUpdates: Mu
     private fun matches(query: String, data: TargetData): Boolean {
         if (query.isBlank()) return true
 
-        if (data.getLabel(context).toString().toLowerCase(Locale.getDefault()).contains(query.toLowerCase(Locale.getDefault()))
-            || data.appInfo.packageName.toLowerCase(Locale.getDefault()).contains(query.toLowerCase(Locale.getDefault())))
+        if (data.getLabel(context).toString().toLowerCase(Locale.getDefault())
+                .contains(query.toLowerCase(Locale.getDefault()))
+            || data.appInfo.packageName.toLowerCase(Locale.getDefault())
+                .contains(query.toLowerCase(Locale.getDefault()))
+        )
             return true
 
         if (matchOverlays) {
@@ -196,9 +220,15 @@ class TargetAdapter(private val context: Context, private val batchedUpdates: Mu
 
             itemView.target_label.text = info.getLabel(itemView.context)
             itemView.target_pkg.text = info.appInfo.packageName
-            itemView.count.text = itemView.resources.getString(R.string.overlay_count, info.info.size)
+            itemView.count.text =
+                itemView.resources.getString(R.string.overlay_count, info.info.size)
             itemView.overlay_list.adapter = adapter
-            itemView.overlay_list.addItemDecoration(DividerItemDecoration(itemView.context, LinearLayoutManager.VERTICAL))
+            itemView.overlay_list.addItemDecoration(
+                DividerItemDecoration(
+                    itemView.context,
+                    LinearLayoutManager.VERTICAL
+                )
+            )
 
             itemView.overlay_list.isVisible = info.expanded
 
@@ -224,7 +254,8 @@ class TargetAdapter(private val context: Context, private val batchedUpdates: Mu
 
         override fun load(request: Request, networkPolicy: Int): Result? {
             return Result(
-                context.packageManager.getApplicationIcon(request.uri.schemeSpecificPart).toBitmap(),
+                context.packageManager.getApplicationIcon(request.uri.schemeSpecificPart)
+                    .toBitmap(),
                 Picasso.LoadedFrom.DISK
             )
         }
