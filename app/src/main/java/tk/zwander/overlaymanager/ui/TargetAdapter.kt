@@ -3,7 +3,6 @@ package tk.zwander.overlaymanager.ui
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,12 +12,10 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
-import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
 import kotlinx.android.synthetic.main.target_item.view.*
-import tk.zwander.overlaymanager.IRootBridge
 import tk.zwander.overlaymanager.R
 import tk.zwander.overlaymanager.data.BatchedUpdate
 import tk.zwander.overlaymanager.data.TargetData
@@ -27,7 +24,6 @@ import tk.zwander.overlaymanager.util.DividerItemDecoration
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class TargetAdapter(private val context: Context, private val batchedUpdates: MutableMap<String, BatchedUpdate>) : RecyclerView.Adapter<TargetAdapter.TargetHolder>(), SearchView.OnQueryTextListener {
     val items = SortedList(TargetData::class.java, object : SortedList.Callback<TargetData>() {
@@ -127,7 +123,7 @@ class TargetAdapter(private val context: Context, private val batchedUpdates: Mu
             it.expanded = expanded
         }
 
-        notifyItemRangeChanged(0, orig.lastIndex)
+        notifyDataSetChanged()
     }
 
     fun setItems(packageManager: PackageManager, items: MutableMap<String, List<OverlayInfo>>, finishListener: () -> Unit) {
@@ -149,7 +145,7 @@ class TargetAdapter(private val context: Context, private val batchedUpdates: Mu
     }
 
     fun notifyChanged() {
-        notifyItemRangeChanged(0, orig.lastIndex)
+        notifyDataSetChanged()
     }
 
     private fun matches(query: String, data: TargetData): Boolean {
@@ -189,7 +185,6 @@ class TargetAdapter(private val context: Context, private val batchedUpdates: Mu
     inner class TargetHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bindInfo(info: TargetData) {
             val adapter = OverlayAdapter(batchedUpdates)
-
             val imgView = itemView.target_icon
 
             picasso
@@ -210,6 +205,7 @@ class TargetAdapter(private val context: Context, private val batchedUpdates: Mu
             adapter.setItems(info.info)
 
             itemView.setOnClickListener {
+                val info = items[adapterPosition]
                 info.expanded = !info.expanded
 
                 notifyItemChanged(adapterPosition)

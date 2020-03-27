@@ -84,17 +84,9 @@ class MainActivity : AppCompatActivity() {
 
                                 copy.forEach { (_, u) ->
                                     u(it)
-                                    targetAdapter.notifyChanged()
                                 }
 
-//                                copy.forEach { (t, u) ->
-//                                    if (t.isEnabled != u) {
-//                                        it.setOverlayEnabled(t.packageName, u)
-//
-//                                        t.updateInstance(it.getOverlayInfo(t.packageName))
-//                                        targetAdapter.notifyChanged()
-//                                    }
-//                                }
+                                targetAdapter.notifyChanged()
                             }
                         }
                         .setNegativeButton(android.R.string.no, null)
