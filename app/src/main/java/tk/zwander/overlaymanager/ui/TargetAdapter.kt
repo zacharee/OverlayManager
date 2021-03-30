@@ -16,10 +16,7 @@ import com.squareup.picasso.Picasso
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
 import kotlinx.android.synthetic.main.target_item.view.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import tk.zwander.overlaymanager.R
 import tk.zwander.overlaymanager.data.BatchedUpdate
 import tk.zwander.overlaymanager.data.TargetData
@@ -39,27 +36,19 @@ class TargetAdapter(
             item1 == item2
 
         override fun onMoved(fromPosition: Int, toPosition: Int) {
-            launch {
-                notifyItemMoved(fromPosition, toPosition)
-            }
+            notifyItemMoved(fromPosition, toPosition)
         }
 
         override fun onChanged(position: Int, count: Int) {
-            launch {
-                notifyItemRangeChanged(position, count)
-            }
+            notifyItemRangeChanged(position, count)
         }
 
         override fun onInserted(position: Int, count: Int) {
-            launch {
-                notifyItemRangeInserted(position, count)
-            }
+            notifyItemRangeInserted(position, count)
         }
 
         override fun onRemoved(position: Int, count: Int) {
-            launch {
-                notifyItemRangeRemoved(position, count)
-            }
+            notifyItemRangeRemoved(position, count)
         }
 
         override fun compare(o1: TargetData, o2: TargetData) =
@@ -143,22 +132,25 @@ class TargetAdapter(
         notifyDataSetChanged()
     }
 
-    fun setItems(
+    suspend fun setItems(
         packageManager: PackageManager,
         items: MutableMap<String, List<OverlayInfo>>
     ) {
+        orig.clear()
         orig.addAll(
-            items.map {
-                try {
-                    val appInfo = packageManager.getApplicationInfo(it.key, 0)
-                    TargetData(
-                        appInfo,
-                        it.value
-                    )
-                } catch (e: Exception) {
-                    null
-                }
-            }.filterNotNull()
+            withContext(Dispatchers.IO) {
+                items.map {
+                    try {
+                        val appInfo = packageManager.getApplicationInfo(it.key, 0)
+                        TargetData(
+                            appInfo,
+                            it.value
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }.filterNotNull()
+            }
         )
     }
 

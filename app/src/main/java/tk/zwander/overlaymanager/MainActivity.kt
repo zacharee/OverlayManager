@@ -118,12 +118,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
         val rootBridge = app.receiver.awaitBridge()
 
-        withContext(Dispatchers.IO) {
-            targetAdapter.setItems(
-                packageManager,
-                rootBridge.allOverlays as MutableMap<String, List<OverlayInfo>>
-            )
-        }
+        targetAdapter.setItems(
+            packageManager,
+            rootBridge.allOverlays as MutableMap<String, List<OverlayInfo>>
+        )
 
         doneLoading = true
         progressItem?.isVisible = false
