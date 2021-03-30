@@ -1,7 +1,11 @@
 package tk.zwander.overlaymanager.util
 
 import android.animation.LayoutTransition
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.view.View
@@ -11,6 +15,8 @@ import it.sephiroth.android.library.xtooltip.Tooltip
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import rikka.shizuku.Shizuku
+import rikka.shizuku.ShizukuProvider
 import tk.zwander.overlaymanager.App
 import tk.zwander.overlaymanager.IRootBridge
 import tk.zwander.overlaymanager.data.BatchedUpdate
@@ -66,4 +72,33 @@ fun OverlayInfo.createPriorityUpdate(high: Boolean, extraAction: (() -> Unit)? =
 
         extraAction?.invoke()
     }
+}
+
+val shizukuAvailable: Boolean
+    get() = Shizuku.pingBinder()
+
+val Context.shizukuGranted: Boolean
+    get() = shizukuAvailable && (if (Shizuku.isPreV11() && Shizuku.getVersion() < 11) {
+        checkCallingOrSelfPermission(ShizukuProvider.PERMISSION) == PackageManager.PERMISSION_GRANTED
+    } else {
+        Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+    })
+
+fun Activity.requestShizukuPermission(code: Int, listener: Shizuku.OnRequestPermissionResultListener) {
+    if (Shizuku.getVersion() >= 11 && !Shizuku.isPreV11()) {
+        Shizuku.addRequestPermissionResultListener(listener)
+        Shizuku.requestPermission(code)
+    } else {
+        requestPermissions(arrayOf(ShizukuProvider.PERMISSION), code)
+    }
+}
+
+//Safely launch a URL.
+//If no matching Activity is found, silently fail.
+fun Context.launchUrl(url: String) {
+    try {
+        val browserIntent =
+            Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        startActivity(browserIntent)
+    } catch (e: Exception) {}
 }

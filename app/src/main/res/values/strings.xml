@@ -18,4 +18,8 @@
 
     <string name="set_highest_priority">Set Highest Priority</string>
     <string name="set_lowest_priority">Set Lowest Priority</string>
+
+    <string name="shizuku_root_required_title">Root Access or Shizuku Required</string>
+    <string name="shizuku_root_required_msg">To use Overlay Manager, you must have root access or have Shizuku set up and running.</string>
+    <string name="shizuku_root_get_shizuku">Get Shizuku</string>
 </resources>

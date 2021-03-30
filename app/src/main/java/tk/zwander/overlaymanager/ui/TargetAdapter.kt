@@ -145,8 +145,7 @@ class TargetAdapter(
 
     fun setItems(
         packageManager: PackageManager,
-        items: MutableMap<String, List<OverlayInfo>>,
-        finishListener: () -> Unit
+        items: MutableMap<String, List<OverlayInfo>>
     ) {
         orig.addAll(
             items.map {
@@ -161,8 +160,6 @@ class TargetAdapter(
                 }
             }.filterNotNull()
         )
-
-        finishListener.invoke()
     }
 
     fun notifyChanged() {

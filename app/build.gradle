@@ -50,4 +50,8 @@ dependencies {
     implementation 'com.hmomeni.progresscircula:progresscircula:0.2.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.github.sephiroth74:android-target-tooltip:2.0.4'
+
+    implementation "dev.rikka.shizuku:api:11.0.2"
+    implementation "dev.rikka.shizuku:provider:11.0.2"
+    implementation 'com.github.ChickenHook:RestrictionBypass:2.2'
 }

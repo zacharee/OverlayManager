@@ -1,6 +1,7 @@
 package tk.zwander.overlaymanager
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
@@ -17,16 +18,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hmomeni.progresscircula.ProgressCircula
+import eu.chainfire.libsuperuser.Shell
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
+import rikka.shizuku.Shizuku
 import tk.zwander.overlaymanager.data.BatchedUpdate
 import tk.zwander.overlaymanager.data.ObservableHashMap
+import tk.zwander.overlaymanager.proxy.IOverlayManager
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.ui.TargetAdapter
-import tk.zwander.overlaymanager.util.DividerItemDecoration
-import tk.zwander.overlaymanager.util.app
-import tk.zwander.overlaymanager.util.createEnabledUpdate
-import tk.zwander.overlaymanager.util.layoutTransition
+import tk.zwander.overlaymanager.util.*
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -53,10 +54,61 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         setSupportActionBar(bottom_bar)
         setTitle(R.string.app_name)
 
+        launch(Dispatchers.IO) {
+            if (Shell.SU.available() || shizukuGranted) {
+                doLoad()
+            } else if (shizukuAvailable && !shizukuGranted) {
+                requestShizukuPermission(100) { code, result ->
+                    if (result == PackageManager.PERMISSION_GRANTED) {
+                        doLoad()
+                    } else {
+                        finish()
+                    }
+                }
+            } else {
+                launch(Dispatchers.Main) {
+                    MaterialAlertDialogBuilder(this@MainActivity)
+                        .setTitle(R.string.shizuku_root_required_title)
+                        .setMessage(R.string.shizuku_root_required_msg)
+                        .setCancelable(false)
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            finish()
+                        }
+                        .setNegativeButton(R.string.shizuku_root_get_shizuku) { _, _ ->
+                            launchUrl("https://github.com/RikkaApps/Shizuku/releases")
+                            finish()
+                        }
+                        .show()
+                }
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == 100) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                doLoad()
+            } else {
+                finish()
+            }
+        }
+    }
+
+    private fun doLoad() = launch(Dispatchers.Main) {
+        if (shizukuAvailable) {
+            app.receiver.tryBindShizuku()
+        }
+
         target_list.adapter = targetAdapter
 
-        target_list.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        target_list.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
+        target_list.layoutManager = LinearLayoutManager(this@MainActivity, RecyclerView.VERTICAL, false)
+        target_list.addItemDecoration(DividerItemDecoration(this@MainActivity, RecyclerView.VERTICAL))
 
         content.layoutTransition = layoutTransition
 
@@ -64,72 +116,68 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             targetAdapter.matchOverlays = isChecked
         }
 
-        app.receiver.postAction {
-            launch(Dispatchers.IO) {
-                targetAdapter.setItems(
-                    packageManager,
-                    it.allOverlays as MutableMap<String, List<OverlayInfo>>
-                ) {
-                    launch(Dispatchers.Main) {
-                        doneLoading = true
-                        progressItem?.isVisible = false
-                        change_all_wrapper.isVisible = true
-                        apply.isVisible = true
+        val rootBridge = app.receiver.awaitBridge()
 
-                        apply.setOnClickListener {
-                            MaterialAlertDialogBuilder(this@MainActivity)
-                                .setTitle(R.string.apply_changes)
-                                .setMessage(R.string.apply_overlays_desc)
-                                .setPositiveButton(android.R.string.yes) {_, _ ->
-                                    app.receiver.postAction {
-                                        val copy = HashMap(batchedUpdates)
-                                        batchedUpdates.clear()
+        withContext(Dispatchers.IO) {
+            targetAdapter.setItems(
+                packageManager,
+                rootBridge.allOverlays as MutableMap<String, List<OverlayInfo>>
+            )
+        }
 
-                                        copy.forEach { (_, u) ->
-                                            u(it)
-                                        }
+        doneLoading = true
+        progressItem?.isVisible = false
+        change_all_wrapper.isVisible = true
+        apply.isVisible = true
 
-                                        targetAdapter.notifyChanged()
-                                    }
-                                }
-                                .setNegativeButton(android.R.string.no, null)
-                                .show()
-                        }
+        apply.setOnClickListener {
+            MaterialAlertDialogBuilder(this@MainActivity)
+                .setTitle(R.string.apply_changes)
+                .setMessage(R.string.apply_overlays_desc)
+                .setPositiveButton(android.R.string.yes) {_, _ ->
+                    val copy = HashMap(batchedUpdates)
+                    batchedUpdates.clear()
 
-                        enable_all.setOnClickListener {
-                            targetAdapter.orig.forEach { td ->
-                                td.info.forEach { info ->
-                                    val i = info.createEnabledUpdate(true)
-                                    batchedUpdates[i.first] = i.second
-
-                                    info.showEnabled = true
-                                }
-                            }
-                            targetAdapter.notifyChanged()
-                        }
-
-                        disable_all.setOnClickListener {
-                            targetAdapter.orig.forEach { td ->
-                                td.info.forEach { info ->
-                                    val i = info.createEnabledUpdate(false)
-                                    batchedUpdates[i.first] = i.second
-
-                                    info.showEnabled = false
-                                }
-                            }
-                            targetAdapter.notifyChanged()
-                        }
-
-                        expand_all.setOnClickListener {
-                            targetAdapter.setAllExpanded(true)
-                        }
-
-                        collapse_all.setOnClickListener {
-                            targetAdapter.setAllExpanded(false)
-                        }
+                    copy.forEach { (_, u) ->
+                        u(rootBridge)
                     }
+
+                    targetAdapter.notifyChanged()
+                }
+                .setNegativeButton(android.R.string.no, null)
+                .show()
+        }
+
+        enable_all.setOnClickListener {
+            targetAdapter.orig.forEach { td ->
+                td.info.forEach { info ->
+                    val i = info.createEnabledUpdate(true)
+                    batchedUpdates[i.first] = i.second
+
+                    info.showEnabled = true
                 }
             }
+            targetAdapter.notifyChanged()
+        }
+
+        disable_all.setOnClickListener {
+            targetAdapter.orig.forEach { td ->
+                td.info.forEach { info ->
+                    val i = info.createEnabledUpdate(false)
+                    batchedUpdates[i.first] = i.second
+
+                    info.showEnabled = false
+                }
+            }
+            targetAdapter.notifyChanged()
+        }
+
+        expand_all.setOnClickListener {
+            targetAdapter.setAllExpanded(true)
+        }
+
+        collapse_all.setOnClickListener {
+            targetAdapter.setAllExpanded(false)
         }
 
         content.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)

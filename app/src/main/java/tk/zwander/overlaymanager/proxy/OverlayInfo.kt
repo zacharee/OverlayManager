@@ -1,6 +1,7 @@
 package tk.zwander.overlaymanager.proxy
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Parcelable
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
@@ -58,7 +59,9 @@ class OverlayInfo(private var instance: Parcelable) : Parcelable {
         get() = getField("priority")
 
     val isStatic: Boolean
-        get() = getField("isStatic")
+        get() = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+            !getField<Boolean>("isMutable")
+        } else getField("isStatic")
 
     val isEnabled: Boolean
         get() = invokeMethod(getMethod("isEnabled"))
