@@ -17,10 +17,8 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.hmomeni.progresscircula.ProgressCircula
 import eu.chainfire.libsuperuser.Shell
 import kotlinx.coroutines.*
-import rikka.shizuku.Shizuku
 import tk.zwander.overlaymanager.data.BatchedUpdate
 import tk.zwander.overlaymanager.data.ObservableHashMap
 import tk.zwander.overlaymanager.databinding.ActivityMainBinding
