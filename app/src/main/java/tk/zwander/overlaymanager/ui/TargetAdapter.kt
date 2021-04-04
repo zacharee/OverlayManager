@@ -15,11 +15,11 @@ import androidx.recyclerview.widget.SortedList
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
-import kotlinx.android.synthetic.main.target_item.view.*
 import kotlinx.coroutines.*
 import tk.zwander.overlaymanager.R
 import tk.zwander.overlaymanager.data.BatchedUpdate
 import tk.zwander.overlaymanager.data.TargetData
+import tk.zwander.overlaymanager.databinding.TargetItemBinding
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.util.DividerItemDecoration
 import java.lang.Exception
@@ -196,9 +196,11 @@ class TargetAdapter(
         .build()
 
     inner class TargetHolder(view: View) : RecyclerView.ViewHolder(view) {
+        private val binding = TargetItemBinding.bind(itemView)
+
         fun bindInfo(info: TargetData) {
             val adapter = OverlayAdapter(batchedUpdates)
-            val imgView = itemView.target_icon
+            val imgView = binding.targetIcon
 
             picasso
                 .load(Uri.parse("${AppIconHandler.SCHEME}:${info.appInfo.packageName}"))
@@ -207,19 +209,19 @@ class TargetAdapter(
                 .centerInside()
                 .into(imgView)
 
-            itemView.target_label.text = info.getLabel(itemView.context)
-            itemView.target_pkg.text = info.appInfo.packageName
-            itemView.count.text =
+            binding.targetLabel.text = info.getLabel(itemView.context)
+            binding.targetPkg.text = info.appInfo.packageName
+            binding.count.text =
                 itemView.resources.getString(R.string.overlay_count, info.info.size)
-            itemView.overlay_list.adapter = adapter
-            itemView.overlay_list.addItemDecoration(
+            binding.overlayList.adapter = adapter
+            binding.overlayList.addItemDecoration(
                 DividerItemDecoration(
                     itemView.context,
                     LinearLayoutManager.VERTICAL
                 )
             )
 
-            itemView.overlay_list.isVisible = info.expanded
+            binding.overlayList.isVisible = info.expanded
 
             adapter.setItems(info.info)
 

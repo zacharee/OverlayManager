@@ -19,11 +19,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hmomeni.progresscircula.ProgressCircula
 import eu.chainfire.libsuperuser.Shell
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import rikka.shizuku.Shizuku
 import tk.zwander.overlaymanager.data.BatchedUpdate
 import tk.zwander.overlaymanager.data.ObservableHashMap
+import tk.zwander.overlaymanager.databinding.ActivityMainBinding
 import tk.zwander.overlaymanager.proxy.IOverlayManager
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.ui.TargetAdapter
@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private val batchedUpdates = ObservableHashMap<String, BatchedUpdate>()
     private val targetAdapter by lazy { TargetAdapter(this, batchedUpdates) }
     private val imm by lazy { getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager }
+    private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     private var progressItem: MenuItem? = null
     private var unappliedAlert: MenuItem? = null
@@ -50,8 +51,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(bottom_bar)
+        setContentView(binding.root)
+        setSupportActionBar(binding.bottomBar)
         setTitle(R.string.app_name)
 
         launch(Dispatchers.IO) {
@@ -105,14 +106,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             app.receiver.tryBindShizuku()
         }
 
-        target_list.adapter = targetAdapter
+        binding.targetList.adapter = targetAdapter
 
-        target_list.layoutManager = LinearLayoutManager(this@MainActivity, RecyclerView.VERTICAL, false)
-        target_list.addItemDecoration(DividerItemDecoration(this@MainActivity, RecyclerView.VERTICAL))
+        binding.targetList.layoutManager = LinearLayoutManager(this@MainActivity, RecyclerView.VERTICAL, false)
+        binding.targetList.addItemDecoration(DividerItemDecoration(this@MainActivity, RecyclerView.VERTICAL))
 
-        content.layoutTransition = layoutTransition
+        binding.content.layoutTransition = layoutTransition
 
-        match_overlays.setOnCheckedChangeListener { _, isChecked ->
+        binding.matchOverlays.setOnCheckedChangeListener { _, isChecked ->
             targetAdapter.matchOverlays = isChecked
         }
 
@@ -125,10 +126,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
         doneLoading = true
         progressItem?.isVisible = false
-        change_all_wrapper.isVisible = true
-        apply.isVisible = true
+        binding.changeAllWrapper.isVisible = true
+        binding.apply.isVisible = true
 
-        apply.setOnClickListener {
+        binding.apply.setOnClickListener {
             MaterialAlertDialogBuilder(this@MainActivity)
                 .setTitle(R.string.apply_changes)
                 .setMessage(R.string.apply_overlays_desc)
@@ -146,7 +147,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 .show()
         }
 
-        enable_all.setOnClickListener {
+        binding.enableAll.setOnClickListener {
             targetAdapter.orig.forEach { td ->
                 td.info.forEach { info ->
                     val i = info.createEnabledUpdate(true)
@@ -158,7 +159,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             targetAdapter.notifyChanged()
         }
 
-        disable_all.setOnClickListener {
+        binding.disableAll.setOnClickListener {
             targetAdapter.orig.forEach { td ->
                 td.info.forEach { info ->
                     val i = info.createEnabledUpdate(false)
@@ -170,22 +171,22 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             targetAdapter.notifyChanged()
         }
 
-        expand_all.setOnClickListener {
+        binding.expandAll.setOnClickListener {
             targetAdapter.setAllExpanded(true)
         }
 
-        collapse_all.setOnClickListener {
+        binding.collapseAll.setOnClickListener {
             targetAdapter.setAllExpanded(false)
         }
 
-        content.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
+        binding.content.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
         cancel()
-        content.viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
+        binding.content.viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
     }
 
     override fun setTitle(titleId: Int) {
@@ -193,25 +194,25 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     }
 
     override fun setTitle(title: CharSequence?) {
-        title_text.text = title
+        binding.titleText.text = title
         super.setTitle(null)
     }
 
     override fun onCreateOptionsMenu(m: Menu): Boolean {
-        val menu = action_menu.menu
+        val menu = binding.actionMenu.menu
         menuInflater.inflate(R.menu.search, menu)
 
         val searchItem = menu.findItem(R.id.action_search)
         searchView = searchItem?.actionView as SearchView?
 
         searchView?.setOnSearchClickListener {
-            match_overlays.isVisible = true
-            change_all_wrapper.isVisible = false
+            binding.matchOverlays.isVisible = true
+            binding.changeAllWrapper.isVisible = false
         }
 
         searchView?.setOnCloseListener {
-            match_overlays.isVisible = false
-            change_all_wrapper.isVisible = true
+            binding.matchOverlays.isVisible = false
+            binding.changeAllWrapper.isVisible = true
             false
         }
 
@@ -242,12 +243,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     }
 
     private fun onKeyboardOpen() {
-        title_text.isVisible = false
-        title_border.isVisible = false
+        binding.titleText.isVisible = false
+        binding.titleBorder.isVisible = false
     }
 
     private fun onKeyboardClose() {
-        title_text.isVisible = true
-        title_border.isVisible = true
+        binding.titleText.isVisible = true
+        binding.titleBorder.isVisible = true
     }
 }

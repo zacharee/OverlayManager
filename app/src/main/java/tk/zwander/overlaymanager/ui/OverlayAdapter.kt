@@ -7,10 +7,10 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
-import kotlinx.android.synthetic.main.overlay_item.view.*
 import tk.zwander.overlaymanager.IRootBridge
 import tk.zwander.overlaymanager.R
 import tk.zwander.overlaymanager.data.BatchedUpdate
+import tk.zwander.overlaymanager.databinding.OverlayItemBinding
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.util.app
 import tk.zwander.overlaymanager.util.createEnabledUpdate
@@ -64,19 +64,21 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<String, BatchedUpdat
     }
 
     inner class OverlayHolder(view: View) : RecyclerView.ViewHolder(view) {
+        private val binding = OverlayItemBinding.bind(itemView)
+
         fun bindInfo(info: OverlayInfo, size: Int) {
             itemView.apply {
-                overlay_package.text = info.packageName
+                binding.overlayPackage.text = info.packageName
 
-                enabled.setOnCheckedChangeListener(null)
+                binding.enabled.setOnCheckedChangeListener(null)
 
                 if (info.isStatic) {
-                    enabled.isChecked = true
-                    enabled.isEnabled = false
+                    binding.enabled.isChecked = true
+                    binding.enabled.isEnabled = false
                 } else {
-                    enabled.isChecked = info.showEnabled
+                    binding.enabled.isChecked = info.showEnabled
 
-                    enabled.setOnCheckedChangeListener { _, isChecked ->
+                    binding.enabled.setOnCheckedChangeListener { _, isChecked ->
                         val item = items.get(adapterPosition)
                         val update = item.createEnabledUpdate(isChecked)
 
@@ -86,13 +88,13 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<String, BatchedUpdat
                     }
                 }
 
-                itemView.priority.text = itemView.context.resources.getString(R.string.priority, info.priority)
+                binding.priority.text = itemView.context.resources.getString(R.string.priority, info.priority)
 
-                set_highest_priority.isEnabled = size > 1
-                set_lowest_priority.isEnabled = size > 1
+                binding.setHighestPriority.isEnabled = size > 1
+                binding.setLowestPriority.isEnabled = size > 1
 
                 if (size > 1) {
-                    set_highest_priority.setOnClickListener {
+                    binding.setHighestPriority.setOnClickListener {
                         val item = items[adapterPosition]
                         val update = item.createPriorityUpdate(true) {
                             notifyItemChanged(adapterPosition)
@@ -101,7 +103,7 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<String, BatchedUpdat
                         batchedUpdates[update.first] = update.second
                     }
 
-                    set_lowest_priority.setOnClickListener {
+                    binding.setLowestPriority.setOnClickListener {
                         val item = items[adapterPosition]
                         val update = item.createPriorityUpdate(false) {
                             notifyItemChanged(adapterPosition)
