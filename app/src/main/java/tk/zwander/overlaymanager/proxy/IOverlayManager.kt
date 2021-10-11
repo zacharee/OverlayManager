@@ -3,17 +3,36 @@ package tk.zwander.overlaymanager.proxy
 import android.annotation.SuppressLint
 import android.os.IBinder
 import android.os.Parcelable
-import eu.chainfire.libsuperuser.Shell
-import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuBinderWrapper
-import rikka.shizuku.SystemServiceHelper
 import java.lang.reflect.Method
 
 @Suppress("UNCHECKED_CAST")
 @SuppressLint("PrivateApi")
 class IOverlayManager {
-    private val clazz = Class.forName("android.content.om.IOverlayManager")
-    private val stubClass = Class.forName("android.content.om.IOverlayManager\$Stub")
+    companion object {
+        private val clazz = Class.forName("android.content.om.IOverlayManager")
+        private val stubClass = Class.forName("android.content.om.IOverlayManager\$Stub")
+        private val omtbClass =
+            Class.forName("android.content.om.OverlayManagerTransaction\$Builder")
+        private val omtClass = Class.forName("android.content.om.OverlayManagerTransaction")
+        private val oiClass = Class.forName("android.content.om.OverlayIdentifier")
+
+        fun getIdentifier(packageName: String, overlayName: String?): Any {
+            return oiClass.getConstructor(
+                String::class.java,
+                String::class.java
+            ).newInstance(packageName, overlayName)
+        }
+
+        fun getIdentifier(source: String): Any {
+            return oiClass.getMethod(
+                "fromString",
+                String::class.java
+            ).invoke(
+                null,
+                source
+            )!!
+        }
+    }
 
     private val obj = run {
         val svcManClass = Class.forName("android.os.ServiceManager")
@@ -51,11 +70,25 @@ class IOverlayManager {
         ).map { OverlayInfo(it as Parcelable) }
 
     fun getOverlayInfo(packageName: String) =
-        invokeMethod<android.content.om.OverlayInfo>(
-            getMethod(
-                "getOverlayInfo",
-                String::class.java, Int::class.java
-            ), packageName, -2
+        OverlayInfo(
+            invokeMethod(
+                getMethod(
+                    "getOverlayInfo",
+                    String::class.java, Int::class.java
+                ), packageName, -2
+            )
+        )
+
+    fun getOverlayInfoByIdentifier(identifier: Any) =
+        OverlayInfo(
+            invokeMethod(
+                getMethod(
+                    "getOverlayInfoByIdentifier",
+                    oiClass,
+                    Int::class.java
+                ),
+                identifier, -2
+            )
         )
 
     fun setEnabled(packageName: String, enable: Boolean) =
@@ -64,9 +97,35 @@ class IOverlayManager {
             packageName, enable, -2
         )
 
+    fun setEnabled(identifier: Any, enable: Boolean) {
+        val builder = omtbClass.newInstance()
+
+        omtbClass.getMethod(
+            "setEnabled",
+            oiClass,
+            Boolean::class.java,
+            Int::class.java
+        ).invoke(
+            builder,
+            identifier,
+            enable,
+            -2
+        )
+
+        commit(
+            omtbClass.getMethod("build")
+                .invoke(builder)!!
+        )
+    }
+
     fun setEnabledExclusive(packageName: String, enable: Boolean) =
         invokeMethod<Boolean>(
-            getMethod("setEnabledExclusive", String::class.java, Boolean::class.java, Int::class.java),
+            getMethod(
+                "setEnabledExclusive",
+                String::class.java,
+                Boolean::class.java,
+                Int::class.java
+            ),
             packageName, enable, -2
         )
 
@@ -92,6 +151,12 @@ class IOverlayManager {
         invokeMethod<Boolean>(
             getMethod("setLowestPriority", String::class.java, Int::class.java),
             packageName, -2
+        )
+
+    fun commit(transaction: Any) =
+        invokeMethod<Unit>(
+            getMethod("commit", omtClass),
+            transaction
         )
 
     private fun getMethod(methodName: String, vararg args: Class<*>) =

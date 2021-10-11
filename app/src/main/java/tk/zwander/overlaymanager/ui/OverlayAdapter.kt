@@ -1,18 +1,14 @@
 package tk.zwander.overlaymanager.ui
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
-import tk.zwander.overlaymanager.IRootBridge
 import tk.zwander.overlaymanager.R
 import tk.zwander.overlaymanager.data.BatchedUpdate
 import tk.zwander.overlaymanager.databinding.OverlayItemBinding
 import tk.zwander.overlaymanager.proxy.OverlayInfo
-import tk.zwander.overlaymanager.util.app
 import tk.zwander.overlaymanager.util.createEnabledUpdate
 import tk.zwander.overlaymanager.util.createPriorityUpdate
 
@@ -38,10 +34,12 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<String, BatchedUpdat
         }
 
         override fun compare(o1: OverlayInfo, o2: OverlayInfo) =
-            if (o1.showEnabled && !o2.showEnabled) -1 else if (!o1.showEnabled && o2.showEnabled) 1 else o1.packageName.compareTo(o2.packageName)
+            if (o1.showEnabled && !o2.showEnabled) -1 else if (!o1.showEnabled && o2.showEnabled) 1 else {
+                o1.idStringOrPackageName.compareTo(o2.idStringOrPackageName)
+            }
 
         override fun areContentsTheSame(oldItem: OverlayInfo, newItem: OverlayInfo) =
-            oldItem.packageName == newItem.packageName
+            oldItem.idStringOrPackageName == newItem.idStringOrPackageName
 
     })
 
@@ -68,7 +66,7 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<String, BatchedUpdat
 
         fun bindInfo(info: OverlayInfo, size: Int) {
             itemView.apply {
-                binding.overlayPackage.text = info.packageName
+                binding.overlayPackage.text = info.idStringOrPackageName
 
                 binding.enabled.setOnCheckedChangeListener(null)
 
@@ -79,34 +77,34 @@ class OverlayAdapter(private val batchedUpdates: MutableMap<String, BatchedUpdat
                     binding.enabled.isChecked = info.showEnabled
 
                     binding.enabled.setOnCheckedChangeListener { _, isChecked ->
-                        val item = items.get(adapterPosition)
+                        val item = items.get(bindingAdapterPosition)
                         val update = item.createEnabledUpdate(isChecked)
 
                         batchedUpdates[update.first] = update.second
                         item.showEnabled = isChecked
-                        items.recalculatePositionOfItemAt(adapterPosition)
+                        items.recalculatePositionOfItemAt(bindingAdapterPosition)
                     }
                 }
 
                 binding.priority.text = itemView.context.resources.getString(R.string.priority, info.priority)
 
-                binding.setHighestPriority.isEnabled = size > 1
-                binding.setLowestPriority.isEnabled = size > 1
+                binding.setHighestPriority.isEnabled = size > 1 && !info.isFabricated
+                binding.setLowestPriority.isEnabled = size > 1 && !info.isFabricated
 
                 if (size > 1) {
                     binding.setHighestPriority.setOnClickListener {
-                        val item = items[adapterPosition]
+                        val item = items[bindingAdapterPosition]
                         val update = item.createPriorityUpdate(true) {
-                            notifyItemChanged(adapterPosition)
+                            notifyItemChanged(bindingAdapterPosition)
                         }
 
                         batchedUpdates[update.first] = update.second
                     }
 
                     binding.setLowestPriority.setOnClickListener {
-                        val item = items[adapterPosition]
+                        val item = items[bindingAdapterPosition]
                         val update = item.createPriorityUpdate(false) {
-                            notifyItemChanged(adapterPosition)
+                            notifyItemChanged(bindingAdapterPosition)
                         }
 
                         batchedUpdates[update.first] = update.second

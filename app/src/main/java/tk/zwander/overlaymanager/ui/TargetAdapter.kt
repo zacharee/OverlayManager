@@ -22,8 +22,6 @@ import tk.zwander.overlaymanager.data.TargetData
 import tk.zwander.overlaymanager.databinding.TargetItemBinding
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.util.DividerItemDecoration
-import java.lang.Exception
-import java.util.*
 import kotlin.collections.ArrayList
 
 class TargetAdapter(
@@ -161,16 +159,16 @@ class TargetAdapter(
     private fun matches(query: String, data: TargetData): Boolean {
         if (query.isBlank()) return true
 
-        if (data.getLabel(context).toString().toLowerCase(Locale.getDefault())
-                .contains(query.toLowerCase(Locale.getDefault()))
-            || data.appInfo.packageName.toLowerCase(Locale.getDefault())
-                .contains(query.toLowerCase(Locale.getDefault()))
+        if (data.getLabel(context).toString()
+                .contains(query, true)
+            || data.appInfo.packageName
+                .contains(query, true)
         )
             return true
 
         if (matchOverlays) {
             data.info.forEach {
-                if (it.packageName.contains(query)) return true
+                if (it.idStringOrPackageName.contains(query, true)) return true
             }
         }
 
@@ -178,14 +176,12 @@ class TargetAdapter(
     }
 
     private fun filter(query: String): List<TargetData> {
-        val lowerCaseQuery = query.toLowerCase(Locale.getDefault())
-
         val filteredModelList = ArrayList<TargetData>()
 
         for (i in 0 until orig.size) {
             val item = orig[i]
 
-            if (matches(lowerCaseQuery, item)) filteredModelList.add(item)
+            if (matches(query, item)) filteredModelList.add(item)
         }
 
         return filteredModelList
@@ -226,10 +222,10 @@ class TargetAdapter(
             adapter.setItems(info.info)
 
             itemView.setOnClickListener {
-                val info = items[adapterPosition]
-                info.expanded = !info.expanded
+                val i = items[bindingAdapterPosition]
+                i.expanded = !i.expanded
 
-                notifyItemChanged(adapterPosition)
+                notifyItemChanged(bindingAdapterPosition)
             }
         }
     }

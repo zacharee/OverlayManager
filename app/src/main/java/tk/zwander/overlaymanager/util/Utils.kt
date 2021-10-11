@@ -8,6 +8,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.os.Parcelable
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import it.sephiroth.android.library.xtooltip.ClosePolicy
@@ -35,7 +37,7 @@ fun View.addTooltip() {
     if (tooltipText != null) {
         val tooltip = Tooltip.Builder(context)
             .anchor(this)
-            .text(tooltipText)
+            .text(tooltipText!!)
             .arrow(false)
             .showDuration(4000L)
             .closePolicy(ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME)
@@ -48,11 +50,17 @@ fun View.addTooltip() {
 }
 
 fun OverlayInfo.createEnabledUpdate(toEnabled: Boolean, extraAction: (() -> Unit)? = null): Pair<String, BatchedUpdate> {
-    val key = "${packageName}_enabled"
+    val key = "${idStringOrPackageName}_enabled"
     return key to BatchedUpdate(key) {
         if (isEnabled != toEnabled) {
-            it.setOverlayEnabled(packageName, toEnabled)
-            updateInstance(it.getOverlayInfo(packageName))
+            if (identifier != null) {
+                it.setOverlayEnabledByIdentifier(idStringOrPackageName, toEnabled)
+            } else {
+                it.setOverlayEnabled(idStringOrPackageName, toEnabled)
+            }
+
+            updateInstance((if (identifier != null) it.getOverlayInfoByIdentifier(idStringOrPackageName)
+                            else it.getOverlayInfo(idStringOrPackageName)))
 
             extraAction?.invoke()
         }
@@ -60,15 +68,15 @@ fun OverlayInfo.createEnabledUpdate(toEnabled: Boolean, extraAction: (() -> Unit
 }
 
 fun OverlayInfo.createPriorityUpdate(high: Boolean, extraAction: (() -> Unit)? = null): Pair<String, BatchedUpdate> {
-    val key = "${packageName}_priority"
+    val key = "${idStringOrPackageName}_priority"
     return key to BatchedUpdate(key) {
         if (high) {
-            it.setOverlayHighestPriority(packageName)
+            it.setOverlayHighestPriority(idStringOrPackageName)
         } else {
-            it.setOverlayLowestPriority(packageName)
+            it.setOverlayLowestPriority(idStringOrPackageName)
         }
 
-        updateInstance(it.getOverlayInfo(packageName))
+        updateInstance(it.getOverlayInfo(idStringOrPackageName))
 
         extraAction?.invoke()
     }

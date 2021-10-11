@@ -17,12 +17,11 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import eu.chainfire.libsuperuser.Shell
+import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.*
 import tk.zwander.overlaymanager.data.BatchedUpdate
 import tk.zwander.overlaymanager.data.ObservableHashMap
 import tk.zwander.overlaymanager.databinding.ActivityMainBinding
-import tk.zwander.overlaymanager.proxy.IOverlayManager
 import tk.zwander.overlaymanager.proxy.OverlayInfo
 import tk.zwander.overlaymanager.ui.TargetAdapter
 import tk.zwander.overlaymanager.util.*
@@ -41,7 +40,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private var searchView: SearchView? = null
 
     private val layoutListener = ViewTreeObserver.OnGlobalLayoutListener {
-        val closed = imm.inputMethodWindowVisibleHeight <= 0
+        val closed = imm::class.java
+            .getMethod("getInputMethodWindowVisibleHeight")
+            .invoke(imm)!!.toString().toInt() <= 0
 
         if (closed) onKeyboardClose()
         else onKeyboardOpen()
@@ -54,10 +55,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         setTitle(R.string.app_name)
 
         launch(Dispatchers.IO) {
-            if (Shell.SU.available() || shizukuGranted) {
+            if (Shell.rootAccess() || shizukuGranted) {
                 doLoad()
             } else if (shizukuAvailable && !shizukuGranted) {
-                requestShizukuPermission(100) { code, result ->
+                requestShizukuPermission(100) { _, result ->
                     if (result == PackageManager.PERMISSION_GRANTED) {
                         doLoad()
                     } else {
@@ -117,6 +118,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
         val rootBridge = app.receiver.awaitBridge()
 
+        @Suppress("UNCHECKED_CAST")
         targetAdapter.setItems(
             packageManager,
             rootBridge.allOverlays as MutableMap<String, List<OverlayInfo>>
@@ -131,7 +133,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             MaterialAlertDialogBuilder(this@MainActivity)
                 .setTitle(R.string.apply_changes)
                 .setMessage(R.string.apply_overlays_desc)
-                .setPositiveButton(android.R.string.yes) {_, _ ->
+                .setPositiveButton(android.R.string.ok) {_, _ ->
                     val copy = HashMap(batchedUpdates)
                     batchedUpdates.clear()
 
@@ -141,7 +143,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
                     targetAdapter.notifyChanged()
                 }
-                .setNegativeButton(android.R.string.no, null)
+                .setNegativeButton(android.R.string.cancel, null)
                 .show()
         }
 

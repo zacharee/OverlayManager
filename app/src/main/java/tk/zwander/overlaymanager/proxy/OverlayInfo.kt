@@ -3,8 +3,8 @@ package tk.zwander.overlaymanager.proxy
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Parcelable
-import kotlinx.android.parcel.IgnoredOnParcel
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 import java.lang.reflect.Method
 
 @Suppress("UNCHECKED_CAST")
@@ -66,11 +66,28 @@ class OverlayInfo(private var instance: Parcelable) : Parcelable {
     val isEnabled: Boolean
         get() = invokeMethod(getMethod("isEnabled"))
 
+    val isFabricated: Boolean
+        get() = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            invokeMethod(getMethod("isFabricated"))
+        } else {
+            false
+        }
+
+    val identifier: Any?
+        get() = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            invokeMethod<Any>(getMethod("getOverlayIdentifier"))
+        } else {
+            null
+        }
+
+    val idStringOrPackageName: String
+        get() = identifier?.toString() ?: packageName
+
     @IgnoredOnParcel
     var showEnabled = isEnabled
 
-    fun updateInstance(instance: Parcelable) {
-        this.instance = instance
+    fun updateInstance(instance: OverlayInfo) {
+        this.instance = instance.instance
         showEnabled = isEnabled
     }
 
