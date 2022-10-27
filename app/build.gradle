@@ -49,7 +49,7 @@ dependencies {
     implementation "com.github.topjohnwu.libsu:core:3.1.2"
     implementation "com.github.topjohnwu.libsu:service:3.1.2"
     implementation 'com.github.2hamed:ProgressCircula:v0.2.1'
-    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.squareup.picasso:picasso:2.8'
     implementation 'com.github.sephiroth74:android-target-tooltip:2.0.4'
 
     implementation 'dev.rikka.shizuku:api:12.2.0'
