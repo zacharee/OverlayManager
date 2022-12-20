@@ -19,4 +19,5 @@ interface IRootBridge {
     boolean setOverlayPriority(in String packageName, in String packageToOutrank) = 8;
     boolean setOverlayHighestPriority(in String packageName) = 9;
     boolean setOverlayLowestPriority(in String packageName) = 10;
+    void clearCache(in String packageName) = 12;
 }

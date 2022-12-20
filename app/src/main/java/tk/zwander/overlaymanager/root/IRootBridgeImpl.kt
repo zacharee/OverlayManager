@@ -49,6 +49,9 @@ class IRootBridgeImpl : IRootBridge.Stub() {
     override fun setOverlayLowestPriority(packageName: String) =
         om.setLowestPriority(packageName)
 
+    override fun clearCache(packageName: String) =
+        om.clearCache(packageName)
+
     override fun destroy() {
         exitProcess(0)
     }

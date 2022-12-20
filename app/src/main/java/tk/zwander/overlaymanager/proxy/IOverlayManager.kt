@@ -159,6 +159,13 @@ class IOverlayManager {
             transaction
         )
 
+    fun clearCache(packageName: String) {
+        invokeMethod<Unit>(
+            getMethod("invalidateCachesForOverlay", String::class.java, Int::class.java),
+            packageName, -2
+        )
+    }
+
     private fun getMethod(methodName: String, vararg args: Class<*>) =
         clazz.getMethod(methodName, *args)
 

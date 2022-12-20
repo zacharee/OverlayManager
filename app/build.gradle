@@ -41,15 +41,15 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.android.material:material:1.8.0-alpha02'
+    implementation 'com.google.android.material:material:1.8.0-beta01'
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
 
-    implementation "com.github.topjohnwu.libsu:core:3.1.2"
+    implementation "com.github.topjohnwu.libsu:core:3.2.1"
     implementation "com.github.topjohnwu.libsu:service:3.1.2"
     implementation 'com.github.2hamed:ProgressCircula:v0.2.1'
-    implementation 'com.squareup.picasso:picasso:2.8'
+    implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.github.sephiroth74:android-target-tooltip:2.0.4'
 
     implementation 'dev.rikka.shizuku:api:12.2.0'
